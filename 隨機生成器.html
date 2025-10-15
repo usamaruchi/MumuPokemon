@@ -1,51 +1,107 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8">
-  <title>雲端隨機生成器 (Supabase)</title>
+  <title>🎲 雲端隨機生成器 (Supabase)</title>
   <style>
-    body { font-family: "Noto Sans TC", sans-serif; text-align: center; margin-top: 50px; }
-    button { padding: 10px 20px; font-size: 16px; border-radius: 6px; cursor: pointer; }
-    .result { margin-top: 20px; font-size: 20px; }
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      text-align: center;
+      margin-top: 60px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .result {
+      margin-top: 25px;
+      font-size: 20px;
+    }
+
+    .status {
+      margin-top: 15px;
+      color: #555;
+      font-size: 14px;
+    }
   </style>
 </head>
+
 <body>
-  <h1>🎲 隨機生成器 (Supabase)</h1>
+  <h1>🎲 雲端隨機生成器 (Supabase)</h1>
   <button id="generate-btn">生成結果</button>
   <div class="result" id="result"></div>
+  <div class="status" id="status"></div>
 
   <script>
-    // 👇 在這裡填入你專案的 API URL 和 anon key
+    // ⚙️ Supabase 設定（請填入自己的專案資訊）
     const SUPABASE_URL = "https://你的project.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzZ2x3c3ppb3BvcmluZmxoY3VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzI5ODEsImV4cCI6MjA3NjA0ODk4MX0.dhaiVLec5_C5qDzWG3GJ0bbXKrH0E0QyQUN8Q9fcCGk";
-    const TABLE = "random_logs";
+    const SUPABASE_KEY = "你的 anon public key"; // 🔒 建議只使用 anon key
+    const TABLE = "random_logs"; // 你在 Supabase 建立的資料表名稱
 
+    // 🎯 群組設定與機率
     const groups = {
       A: ["A1", "A2", "A3", "A4", "A5"],
       B: ["B1", "B2", "B3", "B4", "B5"]
     };
 
+    const statusDiv = document.getElementById("status");
+    const resultDiv = document.getElementById("result");
+
     document.getElementById("generate-btn").addEventListener("click", async () => {
+      statusDiv.textContent = "⏳ 生成中...";
+      statusDiv.style.color = "#555";
+
       const rand = Math.random();
       const chosenGroup = rand < 0.2 ? "A" : "B";
       const chosenItem = groups[chosenGroup][Math.floor(Math.random() * groups[chosenGroup].length)];
-      document.getElementById("result").innerHTML = `🎯 群組：<b>${chosenGroup}</b>　子項目：<b>${chosenItem}</b>`;
 
-      // 儲存到 Supabase
-      await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
-          "Prefer": "return=minimal"
-        },
-        body: JSON.stringify({
-          group_name: chosenGroup,
-          item_name: chosenItem
-        })
-      });
+      resultDiv.innerHTML = `🎯 群組：<b>${chosenGroup}</b>　子項目：<b>${chosenItem}</b>`;
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`,
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify({
+            group_name: chosenGroup,
+            item_name: chosenItem,
+            created_at: new Date().toISOString()
+          })
+        });
+
+        if (res.ok) {
+          statusDiv.textContent = "✅ 已成功儲存到雲端資料庫！";
+          statusDiv.style.color = "green";
+        } else {
+          statusDiv.textContent = "⚠️ 儲存失敗，請檢查 Supabase 設定。";
+          statusDiv.style.color = "red";
+        }
+      } catch (err) {
+        console.error(err);
+        statusDiv.textContent = "❌ 連線錯誤，請檢查網路或 Supabase 網址。";
+        statusDiv.style.color = "red";
+      }
     });
   </script>
+
+  <!--
+  🔒 安全建議：
+  1️⃣ 請務必在 Supabase 後台啟用 Row Level Security (RLS)
+  2️⃣ 並在 Policy 裡新增：
+      - Action: INSERT
+      - Expression: true
+     這樣任何人只能寫入資料，無法讀取或修改。
+  3️⃣ 若你要顯示資料（例如查詢紀錄），再額外新增 SELECT 權限。
+  -->
 </body>
+
 </html>
