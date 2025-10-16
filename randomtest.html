@@ -8,7 +8,47 @@
     body {
       font-family: "Noto Sans TC", sans-serif;
       text-align: center;
-      margin-top: 60px;
+      margin: 50px auto;
+      max-width: 700px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .group-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      gap: 20px;
+    }
+
+    .group {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      width: 280px;
+      background: #fafafa;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .group h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #333;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      padding: 4px 0;
+      font-size: 16px;
+      color: #555;
     }
 
     button {
@@ -16,6 +56,13 @@
       font-size: 16px;
       border-radius: 6px;
       cursor: pointer;
+      background: #007bff;
+      color: #fff;
+      border: none;
+    }
+
+    button:hover {
+      background: #0056b3;
     }
 
     .result {
@@ -33,17 +80,31 @@
 
 <body>
   <h1>🎲 雲端隨機生成器 (Supabase)</h1>
+
+  <!-- 🧩 群組展示區 -->
+  <div class="group-container">
+    <div class="group">
+      <h2>A 群組（20%）</h2>
+      <ul id="listA"></ul>
+    </div>
+    <div class="group">
+      <h2>B 群組（80%）</h2>
+      <ul id="listB"></ul>
+    </div>
+  </div>
+
+  <!-- 🎯 生成結果 -->
   <button id="generate-btn">生成結果</button>
   <div class="result" id="result"></div>
   <div class="status" id="status"></div>
 
   <script>
-    // ⚙️ Supabase 設定（請填入自己的專案資訊）
+    // ⚙️ Supabase 設定
     const SUPABASE_URL = "https://fsglwszioporinflhcuk.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzZ2x3c3ppb3BvcmluZmxoY3VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzI5ODEsImV4cCI6MjA3NjA0ODk4MX0.dhaiVLec5_C5qDzWG3GJ0bbXKrH0E0QyQUN8Q9fcCGk"; // 🔒 建議只使用 anon key
-    const TABLE = "random_logs"; // 你在 Supabase 建立的資料表名稱
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzZ2x3c3ppb3BvcmluZmxoY3VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzI5ODEsImV4cCI6MjA3NjA0ODk4MX0.dhaiVLec5_C5qDzWG3GJ0bbXKrH0E0QyQUN8Q9fcCGk";
+    const TABLE = "random_logs";
 
-    // 🎯 群組設定與機率
+    // 🎯 群組資料
     const groups = {
       A: ["A1", "A2", "A3", "A4", "A5"],
       B: ["B1", "B2", "B3", "B4", "B5"]
@@ -52,6 +113,14 @@
     const statusDiv = document.getElementById("status");
     const resultDiv = document.getElementById("result");
 
+    // 顯示群組項目
+    function renderGroups() {
+      document.getElementById("listA").innerHTML = groups.A.map(i => `<li>${i}</li>`).join("");
+      document.getElementById("listB").innerHTML = groups.B.map(i => `<li>${i}</li>`).join("");
+    }
+    renderGroups();
+
+    // 生成結果
     document.getElementById("generate-btn").addEventListener("click", async () => {
       statusDiv.textContent = "⏳ 生成中...";
       statusDiv.style.color = "#555";
@@ -92,16 +161,6 @@
       }
     });
   </script>
-
-  <!--
-  🔒 安全建議：
-  1️⃣ 請務必在 Supabase 後台啟用 Row Level Security (RLS)
-  2️⃣ 並在 Policy 裡新增：
-      - Action: INSERT
-      - Expression: true
-     這樣任何人只能寫入資料，無法讀取或修改。
-  3️⃣ 若你要顯示資料（例如查詢紀錄），再額外新增 SELECT 權限。
-  -->
 </body>
 
 </html>
