@@ -44,15 +44,28 @@
       color: green;
       font-weight: bold;
     }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    #status {
+      margin-top: 10px;
+      font-size: 14px;
+    }
   </style>
 </head>
 
 <body>
   <h1>🎟️ 抽獎代碼管理後台</h1>
 
-  <div class="mb-3">
+  <div class="btn-group">
     <button id="refresh-btn" class="btn btn-primary btn-sm">🔄 重新載入清單</button>
     <button id="export-btn" class="btn btn-success btn-sm">📄 匯出 CSV</button>
+    <button id="reset-btn" class="btn btn-warning btn-sm">♻️ 一鍵重置代碼</button>
   </div>
 
   <div class="input-group mb-4" style="max-width:400px;">
@@ -74,27 +87,32 @@
     <tbody></tbody>
   </table>
 
-  <div id="status" class="mt-3 text-muted"></div>
+  <div id="status" class="text-muted"></div>
 
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // ⚙️ Supabase 設定
     const SUPABASE_URL = "https://fsglwszioporinflhcuk.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzZ2x3c3ppb3BvcmluZmxoY3VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzI5ODEsImV4cCI6MjA3NjA0ODk4MX0.dhaiVLec5_C5qDzWG3GJ0bbXKrH0E0QyQUN8Q9fcCGk";
-
     const TABLE = "codes";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     const tableBody = document.querySelector("#code-table tbody");
     const statusDiv = document.getElementById("status");
 
+    // 📋 載入代碼清單
     async function fetchCodes() {
       statusDiv.textContent = "載入中...";
       tableBody.innerHTML = "";
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=*`, {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`
-        }
-      });
-      const data = await res.json();
+      const { data, error } = await supabase.from(TABLE).select("*").order("id", { ascending: true });
+
+      if (error) {
+        console.error(error);
+        statusDiv.textContent = "❌ 載入失敗，請檢查連線。";
+        return;
+      }
+
       renderTable(data);
       statusDiv.textContent = `📋 共 ${data.length} 筆代碼`;
     }
@@ -115,50 +133,29 @@
       });
     }
 
+    // ➕ 產生新代碼
     async function generateCodes() {
       const count = parseInt(document.getElementById("newCount").value) || 10;
       statusDiv.textContent = `⏳ 正在產生 ${count} 組代碼...`;
 
-      const sql = `
-        insert into ${TABLE} (code)
-        select 'MM2025-' || substring(md5(random()::text), 1, 8)
-        from generate_series(1, ${count});
-      `;
-
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify({ query: sql })
-      });
-
-      // Supabase REST 不允許直接執行 SQL（這裡只是展示）
-      // 實際上我們改用另一個 endpoint：PostgREST 無法執行任意 SQL
-      // 因此改成手動插入代碼：
-
-      let values = [];
+      const values = [];
       for (let i = 0; i < count; i++) {
         const rand = Math.random().toString(36).substring(2, 10).toUpperCase();
         values.push({ code: `MM2025-${rand}` });
       }
 
-      await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify(values)
-      });
+      const { error } = await supabase.from(TABLE).insert(values);
 
-      statusDiv.textContent = `✅ 已產生 ${count} 組新代碼`;
-      fetchCodes();
+      if (error) {
+        console.error(error);
+        statusDiv.textContent = "❌ 代碼生成失敗。";
+      } else {
+        statusDiv.textContent = `✅ 已產生 ${count} 組新代碼`;
+        fetchCodes();
+      }
     }
 
+    // 📄 匯出 CSV
     function exportCSV() {
       let csv = "id,code,used,used_at\n";
       document.querySelectorAll("#code-table tbody tr").forEach(row => {
@@ -174,10 +171,29 @@
       link.click();
     }
 
+    // ♻️ 一鍵重置代碼
+    async function resetCodes() {
+      if (!confirm("⚠️ 確定要將所有代碼重置為未使用狀態？")) return;
+
+      statusDiv.textContent = "⏳ 正在重置代碼...";
+      const { data, error } = await supabase.rpc("reset_all_codes");
+
+      if (error) {
+        console.error(error);
+        statusDiv.textContent = "❌ 重置失敗，請檢查權限或 RPC 是否存在。";
+      } else {
+        statusDiv.textContent = "✅ 所有代碼已成功重置！";
+        fetchCodes();
+      }
+    }
+
+    // 綁定按鈕事件
     document.getElementById("refresh-btn").addEventListener("click", fetchCodes);
     document.getElementById("generate-btn").addEventListener("click", generateCodes);
     document.getElementById("export-btn").addEventListener("click", exportCSV);
+    document.getElementById("reset-btn").addEventListener("click", resetCodes);
 
+    // 初始載入
     fetchCodes();
   </script>
 </body>
