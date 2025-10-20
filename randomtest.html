@@ -3,17 +3,29 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>小木木飼育屋抽獎專區</title>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: "Noto Sans TC", sans-serif;
       text-align: center;
       margin: 50px auto;
-      max-width: 700px;
+      max-width: 900px;
     }
 
-    h1 {
+    .font-style-h1 {
       margin-bottom: 20px;
+      font-size: 32px;
     }
 
     .group-container {
@@ -28,7 +40,6 @@
       border: 2px solid #ccc;
       border-radius: 10px;
       padding: 15px;
-      width: 280px;
       background: #fafafa;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
@@ -75,28 +86,68 @@
       color: #555;
       font-size: 14px;
     }
+
+    /* 新增代碼輸入欄 */
+    .code-section {
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      width: 250px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
   </style>
 </head>
 
 <body>
-  <h1>小木木飼育屋抽獎專區</h1>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="font-style-h1">小木木飼育屋抽獎專區</h1>
+      </div>
 
-  <!-- 🧩 群組展示區 -->
-  <div class="group-container">
-    <div class="group">
-      <h2>A 群組（機率20%）</h2>
-      <ul id="listA"></ul>
-    </div>
-    <div class="group">
-      <h2>B 群組（機率80%）</h2>
-      <ul id="listB"></ul>
+      <!-- 🧩 新增：輸入抽獎代碼 -->
+      <div class="col-12 code-section">
+        <input type="text" id="code-input" placeholder="請輸入抽獎代碼">
+        <button id="code-btn">確認代碼</button>
+        <div class="status" id="code-status"></div>
+      </div>
+
+      <div class="col-md-4 py-2">
+        <div class="group">
+          <h2>A 獎區（中獎率15%）</h2>
+          <ul id="listA"></ul>
+        </div>
+      </div>
+
+      <div class="col-md-4 py-2">
+        <div class="group">
+          <h2>B 獎區（中獎率35%）</h2>
+          <ul id="listB"></ul>
+        </div>
+      </div>
+
+      <div class="col-md-4 py-2">
+        <div class="group">
+          <h2>C 獎區（中獎率50%）</h2>
+          <ul id="listC"></ul>
+        </div>
+      </div>
+
+      <div class="col-12 py-4">
+        <button id="generate-btn" class="disabled">抽獎</button>
+        <div class="result" id="result"></div>
+        <div class="status" id="status"></div>
+      </div>
     </div>
   </div>
-
-  <!-- 🎯 生成結果 -->
-  <button id="generate-btn">抽獎</button>
-  <div class="result" id="result"></div>
-  <div class="status" id="status"></div>
 
   <script>
     // ⚙️ Supabase 設定
@@ -106,8 +157,9 @@
 
     // 🎯 群組資料
     const groups = {
-      A: ["A1", "A2", "A3", "A4", "A5"],
-      B: ["B1", "B2", "B3", "B4", "B5"]
+      A: ["皮卡丘", "A2", "A3", "A4", "A5"],
+      B: ["B1", "B2", "B3", "B4", "B5"],
+      C: ["C1", "C2", "C3", "C4", "C5"]
     };
 
     const statusDiv = document.getElementById("status");
@@ -117,16 +169,81 @@
     function renderGroups() {
       document.getElementById("listA").innerHTML = groups.A.map(i => `<li>${i}</li>`).join("");
       document.getElementById("listB").innerHTML = groups.B.map(i => `<li>${i}</li>`).join("");
+      document.getElementById("listC").innerHTML = groups.C.map(i => `<li>${i}</li>`).join("");
     }
     renderGroups();
 
-    // 生成結果
-    document.getElementById("generate-btn").addEventListener("click", async () => {
-      statusDiv.textContent = "⏳ 生成中...";
+    // 🎰 抽獎機率邏輯
+    function chooseGroup() {
+      const rand = Math.random(); // 0~1
+      if (rand < 0.15) return "A";       // 15%
+      else if (rand < 0.50) return "B";  // 35%
+      else return "C";                   // 50%
+    }
+
+    // === 抽獎代碼驗證 ===
+    const codeBtn = document.getElementById("code-btn");
+    const codeInput = document.getElementById("code-input");
+    const codeStatus = document.getElementById("code-status");
+    const generateBtn = document.getElementById("generate-btn");
+    let redeemedCode = null; // 紀錄成功使用的代碼
+
+    codeBtn.addEventListener("click", async () => {
+      const code = codeInput.value.trim();
+      if (!code) {
+        codeStatus.textContent = "請輸入抽獎代碼。";
+        codeStatus.style.color = "red";
+        return;
+      }
+
+      codeStatus.textContent = "驗證中...";
+      codeStatus.style.color = "#555";
+
+      // 呼叫 Supabase RPC 兌換代碼
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rpc/redeem_code`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({ p_code: code })
+        });
+
+        const data = await res.json();
+        const ok = data === true || (Array.isArray(data) && data[0] === true);
+
+        if (ok) {
+          redeemedCode = code;
+          codeStatus.textContent = "✅ 驗證成功！代碼已啟用抽獎資格。";
+          codeStatus.style.color = "green";
+          generateBtn.classList.remove("disabled");
+          codeInput.disabled = true;
+          codeBtn.disabled = true;
+        } else {
+          codeStatus.textContent = "❌ 代碼不存在或已使用過。";
+          codeStatus.style.color = "red";
+        }
+      } catch (err) {
+        console.error(err);
+        codeStatus.textContent = "⚠️ 無法連線至伺服器，請稍後再試。";
+        codeStatus.style.color = "red";
+      }
+    });
+
+    // === 抽獎 ===
+    generateBtn.addEventListener("click", async () => {
+      if (generateBtn.classList.contains("disabled")) {
+        statusDiv.textContent = "⚠️ 請先輸入並驗證抽獎代碼。";
+        statusDiv.style.color = "red";
+        return;
+      }
+
+      statusDiv.textContent = "⏳ 抽獎中...";
       statusDiv.style.color = "#555";
 
-      const rand = Math.random();
-      const chosenGroup = rand < 0.2 ? "A" : "B";
+      const chosenGroup = chooseGroup();
       const chosenItem = groups[chosenGroup][Math.floor(Math.random() * groups[chosenGroup].length)];
 
       resultDiv.innerHTML = `🎯 群組：<b>${chosenGroup}</b>　子項目：<b>${chosenItem}</b>`;
@@ -143,20 +260,22 @@
           body: JSON.stringify({
             group_name: chosenGroup,
             item_name: chosenItem,
+            code_used: redeemedCode,
             created_at: new Date().toISOString()
           })
         });
 
         if (res.ok) {
-          statusDiv.textContent = "✅ 已成功儲存到雲端資料庫！";
+          statusDiv.textContent = "✅ 抽獎結果已儲存至雲端資料庫！";
           statusDiv.style.color = "green";
+          generateBtn.classList.add("disabled"); // 禁止再次抽獎
         } else {
-          statusDiv.textContent = "⚠️ 儲存失敗，請檢查 Supabase 設定。";
+          statusDiv.textContent = "⚠️ 資料儲存失敗。";
           statusDiv.style.color = "red";
         }
       } catch (err) {
         console.error(err);
-        statusDiv.textContent = "❌ 連線錯誤，請檢查網路或 Supabase 網址。";
+        statusDiv.textContent = "❌ 連線錯誤，請檢查網路。";
         statusDiv.style.color = "red";
       }
     });
