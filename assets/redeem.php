@@ -7,7 +7,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 // ✅ Supabase 參數
 $SUPABASE_URL = "https://fsglwszioporinflhcuk.supabase.co";
-$SUPABASE_KEY = "你的_key_放這裡";
+$SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzZ2x3c3ppb3BvcmluZmxoY3VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzI5ODEsImV4cCI6MjA3NjA0ODk4MX0.dhaiVLec5_C5qDzWG3GJ0bbXKrH0E0QyQUN8Q9fcCGk";
 
 // ✅ 取得輸入代碼
 $input = json_decode(file_get_contents("php://input"), true);
