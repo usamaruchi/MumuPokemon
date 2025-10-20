@@ -21,7 +21,7 @@ const generateBtn = document.getElementById('generate-btn');
 const recentList = document.getElementById('recent-list');
 let redeemedCode = null;
 
-// 顯示群組項目
+// 📋 顯示群組項目
 function renderGroups() {
   document.getElementById('listA').innerHTML = groups.A.map((i) => `<li>${i}</li>`).join('');
   document.getElementById('listB').innerHTML = groups.B.map((i) => `<li>${i}</li>`).join('');
@@ -37,7 +37,7 @@ function chooseGroup() {
   else return 'C';
 }
 
-// 🧹 重置整體狀態（可再次抽獎）
+// 🧹 重置狀態
 function resetAll() {
   redeemedCode = null;
   codeInput.value = '';
@@ -49,25 +49,35 @@ function resetAll() {
   codeStatus.textContent = '';
 }
 
-// 🆕 載入最新抽獎紀錄
+// 🆕 載入最新抽獎紀錄（前 5 筆）
 async function loadRecentDraws() {
   const { data, error } = await supabase
     .from(TABLE)
-    .select('*')
-    .order('created_at', { ascending: false })
+    .select('id, group_name, item_name, code_used, created_at')
+    .order('id', { ascending: false })
     .limit(5);
 
   if (error) {
     console.error('載入最新抽獎紀錄失敗:', error);
+    recentList.innerHTML = '<li style="color:red;">⚠️ 無法載入最新抽獎紀錄</li>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    recentList.innerHTML = '<li style="color:#777;">（目前尚無抽獎紀錄）</li>';
     return;
   }
 
   recentList.innerHTML = data
     .map(
-      (row) =>
-        `<li>🎯 <b>${row.group_name}</b> - ${row.item_name} <small style="color:#777;">(${new Date(
-          row.created_at
-        ).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })})</small></li>`
+      (row) => `
+      <li>
+        🎯 <b>${row.group_name}</b> - ${row.item_name}
+        <small style="color:#777;">
+          (${new Date(row.created_at).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })})
+        </small>
+      </li>
+    `
     )
     .join('');
 }
@@ -140,8 +150,8 @@ generateBtn.addEventListener('click', async () => {
     statusDiv.style.color = 'green';
     generateBtn.classList.add('disabled');
 
-    // 立即更新最新紀錄
-    loadRecentDraws();
+    // ✅ 成功後立即刷新最新紀錄
+    await loadRecentDraws();
 
     setTimeout(() => {
       alert('🎉 抽獎完成！可以輸入新的抽獎代碼再試一次～');
@@ -150,5 +160,5 @@ generateBtn.addEventListener('click', async () => {
   }
 });
 
-// 初始化載入最新抽獎紀錄
+// 🚀 初始載入最新紀錄
 loadRecentDraws();
