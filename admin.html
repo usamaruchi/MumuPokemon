@@ -176,7 +176,8 @@
       if (!confirm("⚠️ 確定要將所有代碼重置為未使用狀態？")) return;
 
       statusDiv.textContent = "⏳ 正在重置代碼...";
-      const { data, error } = await supabase.rpc("reset_all_codes");
+      const { data, error } = await supabase.rpc("reset_all_codes", {});
+
 
       if (error) {
         console.error(error);
