@@ -18,6 +18,7 @@ const codeBtn = document.getElementById('code-btn');
 const codeInput = document.getElementById('code-input');
 const codeStatus = document.getElementById('code-status');
 const generateBtn = document.getElementById('generate-btn');
+const recentList = document.getElementById('recent-list');
 let redeemedCode = null;
 
 // 顯示群組項目
@@ -46,6 +47,29 @@ function resetAll() {
   resultDiv.innerHTML = '';
   statusDiv.textContent = '';
   codeStatus.textContent = '';
+}
+
+// 🆕 載入最新抽獎紀錄
+async function loadRecentDraws() {
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  if (error) {
+    console.error('載入最新抽獎紀錄失敗:', error);
+    return;
+  }
+
+  recentList.innerHTML = data
+    .map(
+      (row) =>
+        `<li>🎯 <b>${row.group_name}</b> - ${row.item_name} <small style="color:#777;">(${new Date(
+          row.created_at
+        ).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })})</small></li>`
+    )
+    .join('');
 }
 
 // === 抽獎代碼驗證 ===
@@ -116,9 +140,15 @@ generateBtn.addEventListener('click', async () => {
     statusDiv.style.color = 'green';
     generateBtn.classList.add('disabled');
 
+    // 立即更新最新紀錄
+    loadRecentDraws();
+
     setTimeout(() => {
       alert('🎉 抽獎完成！可以輸入新的抽獎代碼再試一次～');
       resetAll();
     }, 1500);
   }
 });
+
+// 初始化載入最新抽獎紀錄
+loadRecentDraws();
