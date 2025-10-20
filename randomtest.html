@@ -149,11 +149,13 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // ⚙️ Supabase 設定
     const SUPABASE_URL = "https://fsglwszioporinflhcuk.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzZ2x3c3ppb3BvcmluZmxoY3VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzI5ODEsImV4cCI6MjA3NjA0ODk4MX0.dhaiVLec5_C5qDzWG3GJ0bbXKrH0E0QyQUN8Q9fcCGk";
     const TABLE = "random_logs";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // 🎯 群組資料
     const groups = {
@@ -164,6 +166,11 @@
 
     const statusDiv = document.getElementById("status");
     const resultDiv = document.getElementById("result");
+    const codeBtn = document.getElementById("code-btn");
+    const codeInput = document.getElementById("code-input");
+    const codeStatus = document.getElementById("code-status");
+    const generateBtn = document.getElementById("generate-btn");
+    let redeemedCode = null;
 
     // 顯示群組項目
     function renderGroups() {
@@ -175,19 +182,25 @@
 
     // 🎰 抽獎機率邏輯
     function chooseGroup() {
-      const rand = Math.random(); // 0~1
-      if (rand < 0.15) return "A";       // 15%
-      else if (rand < 0.50) return "B";  // 35%
-      else return "C";                   // 50%
+      const rand = Math.random();
+      if (rand < 0.15) return "A";
+      else if (rand < 0.50) return "B";
+      else return "C";
+    }
+
+    // 🧹 重置整體狀態（可再次抽獎）
+    function resetAll() {
+      redeemedCode = null;
+      codeInput.value = "";
+      codeInput.disabled = false;
+      codeBtn.disabled = false;
+      generateBtn.classList.add("disabled");
+      resultDiv.innerHTML = "";
+      statusDiv.textContent = "";
+      codeStatus.textContent = "";
     }
 
     // === 抽獎代碼驗證 ===
-    const codeBtn = document.getElementById("code-btn");
-    const codeInput = document.getElementById("code-input");
-    const codeStatus = document.getElementById("code-status");
-    const generateBtn = document.getElementById("generate-btn");
-    let redeemedCode = null; // 紀錄成功使用的代碼
-
     codeBtn.addEventListener("click", async () => {
       const code = codeInput.value.trim();
       if (!code) {
@@ -199,21 +212,17 @@
       codeStatus.textContent = "驗證中...";
       codeStatus.style.color = "#555";
 
-      // 呼叫 Supabase RPC 兌換代碼
       try {
-        const res = await fetch(`${SUPABASE_URL}/rpc/redeem_code`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`
-          },
-          body: JSON.stringify({ p_code: code })
-        });
+        const { data, error } = await supabase.rpc("redeem_code", { p_code: code });
 
-        const data = await res.json();
+        if (error) {
+          console.error(error);
+          codeStatus.textContent = "⚠️ 伺服器錯誤，請稍後再試。";
+          codeStatus.style.color = "red";
+          return;
+        }
+
         const ok = data === true || (Array.isArray(data) && data[0] === true);
-
         if (ok) {
           redeemedCode = code;
           codeStatus.textContent = "✅ 驗證成功！代碼已啟用抽獎資格。";
@@ -245,33 +254,30 @@
 
       const chosenGroup = chooseGroup();
       const chosenItem = groups[chosenGroup][Math.floor(Math.random() * groups[chosenGroup].length)];
-
       resultDiv.innerHTML = `🎯 群組：<b>${chosenGroup}</b>　子項目：<b>${chosenItem}</b>`;
 
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`,
-            "Prefer": "return=minimal"
-          },
-          body: JSON.stringify({
-            group_name: chosenGroup,
-            item_name: chosenItem,
-            code_used: redeemedCode,
-            created_at: new Date().toISOString()
-          })
-        });
+        const { error } = await supabase.from(TABLE).insert([{
+          group_name: chosenGroup,
+          item_name: chosenItem,
+          code_used: redeemedCode,
+          created_at: new Date().toISOString()
+        }]);
 
-        if (res.ok) {
-          statusDiv.textContent = "✅ 抽獎結果已儲存至雲端資料庫！";
-          statusDiv.style.color = "green";
-          generateBtn.classList.add("disabled"); // 禁止再次抽獎
-        } else {
+        if (error) {
+          console.error(error);
           statusDiv.textContent = "⚠️ 資料儲存失敗。";
           statusDiv.style.color = "red";
+        } else {
+          statusDiv.textContent = "✅ 抽獎結果已儲存至雲端資料庫！";
+          statusDiv.style.color = "green";
+          generateBtn.classList.add("disabled");
+
+          // 🎉 新增提示與重置功能
+          setTimeout(() => {
+            alert("🎉 抽獎完成！可以輸入新的抽獎代碼再試一次～");
+            resetAll();
+          }, 1500);
         }
       } catch (err) {
         console.error(err);
@@ -280,6 +286,7 @@
       }
     });
   </script>
+
 </body>
 
 </html>
