@@ -45,34 +45,27 @@
       font-weight: bold;
     }
 
-    .btn-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
     #status {
       margin-top: 10px;
       font-size: 14px;
+    }
+
+    .btn-group {
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
     }
   </style>
 </head>
 
 <body>
-  <h1>🎟️ 抽獎代碼管理後台</h1>
+  <h1>🎟️ 抽獎代碼管理後台（簡化版）</h1>
 
   <div class="btn-group">
     <button id="refresh-btn" class="btn btn-primary btn-sm">🔄 重新載入清單</button>
+    <button id="generate-btn" class="btn btn-info btn-sm">➕ 產生新代碼</button>
     <button id="export-btn" class="btn btn-success btn-sm">📄 匯出 CSV</button>
-    <button id="reset-btn" class="btn btn-warning btn-sm">♻️ 一鍵重置代碼</button>
-  </div>
-
-  <div class="input-group mb-4" style="max-width:400px;">
-    <input id="newCount" type="number" class="form-control" placeholder="生成代碼數量 (預設10)">
-    <div class="input-group-append">
-      <button id="generate-btn" class="btn btn-info">➕ 產生新代碼</button>
-    </div>
   </div>
 
   <table id="code-table">
@@ -89,7 +82,6 @@
 
   <div id="status" class="text-muted"></div>
 
-  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // ⚙️ Supabase 設定
@@ -104,15 +96,12 @@
     // 📋 載入代碼清單
     async function fetchCodes() {
       statusDiv.textContent = "載入中...";
-      tableBody.innerHTML = "";
-      const { data, error } = await supabase.from(TABLE).select("*").order("id", { ascending: true });
-
+      const { data, error } = await supabase.from(TABLE).select("*").order("id");
       if (error) {
+        statusDiv.textContent = "❌ 載入失敗";
         console.error(error);
-        statusDiv.textContent = "❌ 載入失敗，請檢查連線。";
         return;
       }
-
       renderTable(data);
       statusDiv.textContent = `📋 共 ${data.length} 筆代碼`;
     }
@@ -127,7 +116,12 @@
           <td class="${row.used ? "status-used" : "status-unused"}">
             ${row.used ? "已使用" : "未使用"}
           </td>
-          <td>${row.used_at ? new Date(row.used_at).toLocaleString() : "-"}</td>
+        <td>${row.used_at
+            ? new Date(row.used_at).toLocaleString("zh-TW", {
+              timeZone: "Asia/Taipei"
+            })
+            : "-"
+          }</td>
         `;
         tableBody.appendChild(tr);
       });
@@ -135,20 +129,20 @@
 
     // ➕ 產生新代碼
     async function generateCodes() {
-      const count = parseInt(document.getElementById("newCount").value) || 10;
+      const count = prompt("請輸入要新增的代碼數量：", "10");
+      if (!count || isNaN(count)) return;
       statusDiv.textContent = `⏳ 正在產生 ${count} 組代碼...`;
 
       const values = [];
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < parseInt(count); i++) {
         const rand = Math.random().toString(36).substring(2, 10).toUpperCase();
         values.push({ code: `MM2025-${rand}` });
       }
 
       const { error } = await supabase.from(TABLE).insert(values);
-
       if (error) {
+        statusDiv.textContent = "❌ 代碼生成失敗";
         console.error(error);
-        statusDiv.textContent = "❌ 代碼生成失敗。";
       } else {
         statusDiv.textContent = `✅ 已產生 ${count} 組新代碼`;
         fetchCodes();
@@ -162,39 +156,18 @@
         const cols = Array.from(row.children).map(td => td.textContent);
         csv += cols.join(",") + "\n";
       });
-
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = url;
+      link.href = URL.createObjectURL(blob);
       link.download = "codes_export.csv";
       link.click();
     }
 
-    // ♻️ 一鍵重置代碼
-    async function resetCodes() {
-      if (!confirm("⚠️ 確定要將所有代碼重置為未使用狀態？")) return;
-
-      statusDiv.textContent = "⏳ 正在重置代碼...";
-      const { data, error } = await supabase.rpc("reset_all_codes", {});
-
-
-      if (error) {
-        console.error(error);
-        statusDiv.textContent = "❌ 重置失敗，請檢查權限或 RPC 是否存在。";
-      } else {
-        statusDiv.textContent = "✅ 所有代碼已成功重置！";
-        fetchCodes();
-      }
-    }
-
-    // 綁定按鈕事件
+    // 綁定按鈕
     document.getElementById("refresh-btn").addEventListener("click", fetchCodes);
     document.getElementById("generate-btn").addEventListener("click", generateCodes);
     document.getElementById("export-btn").addEventListener("click", exportCSV);
-    document.getElementById("reset-btn").addEventListener("click", resetCodes);
 
-    // 初始載入
     fetchCodes();
   </script>
 </body>
