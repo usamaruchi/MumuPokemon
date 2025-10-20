@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+
+  <title>小木木飼育屋抽獎專區</title>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      text-align: center;
+      margin: 50px auto;
+      max-width: 900px;
+    }
+
+    .font-style-h1 {
+      margin-bottom: 20px;
+      font-size: 32px;
+    }
+
+    .group-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      gap: 20px;
+    }
+
+    .group {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      background: #fafafa;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      min-height: 305px
+    }
+
+    .group h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #333;
+    }
+
+    .group ul {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      /* grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); */
+      /* grid-template-columns: repeat(3, 1fr); */
+      /* 三欄 */
+
+
+      /* 兩欄排列 */
+      gap: 6px 10px;
+      /* 行間距、列間距 */
+      justify-items: center;
+      /* 讓文字置中 */
+    }
+
+    .group li {
+      list-style: none;
+      padding: 4px 0;
+      font-size: 16px;
+      color: #555;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      transition: background 0.2s ease-in-out;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .result {
+      margin-top: 25px;
+      font-size: 20px;
+    }
+
+    .status {
+      margin-top: 15px;
+      color: #555;
+      font-size: 14px;
+    }
+
+    /* 新增代碼輸入欄 */
+    .code-section {
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      width: 250px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="font-style-h1">小木木飼育屋抽獎專區</h1>
+      </div>
+
+      <!-- 🧩 新增：輸入抽獎代碼 -->
+      <div class="col-12 code-section">
+        <input type="text" id="code-input" placeholder="請輸入抽獎代碼">
+        <button id="code-btn">確認代碼</button>
+        <div class="status" id="code-status"></div>
+      </div>
+
+      <div class="col-md-4 py-2">
+        <div class="group">
+          <h2>A 獎（中獎率15%）</h2>
+          <ul id="listA"></ul>
+        </div>
+      </div>
+
+      <div class="col-md-4 py-2">
+        <div class="group">
+          <h2>B 獎（中獎率35%）</h2>
+          <ul id="listB"></ul>
+        </div>
+      </div>
+
+      <div class="col-md-4 py-2">
+        <div class="group">
+          <h2>C 獎（中獎率50%）</h2>
+          <ul id="listC"></ul>
+        </div>
+      </div>
+
+      <div class="col-12 py-4">
+        <button id="generate-btn" class="disabled">抽獎</button>
+        <div class="result" id="result"></div>
+        <div class="status" id="status"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="assets/main.js" defer></script>
+
+</body>
+
+</html>
