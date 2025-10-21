@@ -183,7 +183,7 @@ generateBtn.addEventListener('click', async () => {
     statusDiv.textContent = '⚠️ 資料儲存失敗。';
     statusDiv.style.color = 'red';
   } else {
-    statusDiv.textContent = '✅ 抽獎結果已儲存至雲端資料庫！';
+    statusDiv.textContent = '✅ 抽獎結果已儲存！';
     statusDiv.style.color = 'green';
     generateBtn.classList.add('disabled');
 
