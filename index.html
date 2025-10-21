@@ -10,8 +10,28 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
 
+  <!-- //  給 FB 看的屬性標籤 -->
+  <meta property="og:title" content="小木木抽抽屋">
+  <meta property="og:description" content="由「小木木飼育屋」特別打造的寶可夢主題抽獎網頁，定期更新豐富的活動內容，提供各式各樣的寶可夢與限定配信，讓訓練家們都有機會試試手氣、蒐集心儀的寶可夢！
+每一期都有不同主題與稀有寶可夢登場，活動期間僅限時開放，千萬別錯過屬於你的幸運時刻✨">
 
-  <title>小木木飼育屋抽獎專區</title>
+  <meta property=" og:site_name" content="小木木抽抽屋">
+
+  <!-- <meta property="og:url" content=""> -->
+  <!-- <meta property="og:image" content=""> -->
+
+  <meta name="description" content="由「小木木飼育屋」特別打造的寶可夢主題抽獎網頁，定期更新豐富的活動內容，提供各式各樣的寶可夢與限定配信，讓訓練家們都有機會試試手氣、蒐集心儀的寶可夢！
+每一期都有不同主題與稀有寶可夢登場，活動期間僅限時開放，千萬別錯過屬於你的幸運時刻✨">
+
+
+  <!-- // 網頁的 favicon，可使用 ico 或是 png 檔 -->
+  <!-- <link rel="icon" type="image/x-icon" href="images/ttlogo.ico"> -->
+  <!-- <link rel="icon" type="image/png" href="images/ttlogo.png"> -->
+  <!-- Apple Touch Icon -->
+  <!-- <link rel="apple-touch-icon" href="images/ttlogo.png"> -->
+
+
+  <title>小木木抽抽屋</title>
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
     integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
@@ -125,7 +145,7 @@
 
     /* 新增代碼輸入欄 */
     .code-section {
-      margin-bottom: 30px;
+      margin: 10px 0 10px 0;
     }
 
     input[type="text"] {
@@ -153,7 +173,17 @@
   <div class="container">
     <div class="row">
       <div class="col-12">
-        <h1 class="font-style-h1">小木木飼育屋抽獎專區</h1>
+        <h1 class="font-style-h1">🏠️小木木抽抽屋</h1>
+      </div>
+
+      <div class="col-12 code-section">
+        <p class="font-style-p">
+          消費滿 300元 ✨即可獲得一次抽獎機會！🎁 <br>
+          獎品抽出後無法更換，請訓練家們多多包涵💖<br>
+          本期主題是【👻幽靈系寶可夢】<br>
+          下次更新時間：11/08，敬請期待！🌙
+
+        </p>
       </div>
 
       <!-- 🧩 新增：輸入抽獎代碼 -->
@@ -161,10 +191,6 @@
         <input class="my-2" type="text" id="code-input" placeholder="請輸入抽獎代碼">
         <button id="code-btn">確認代碼</button>
         <div class="status" id="code-status"></div>
-      </div>
-
-      <div class="col-12">
-        <p class="font-style-p">本次主題為『幽靈寶可夢』，下次更新時間 11/08</p>
       </div>
 
       <div class="col-md-4 py-2">
@@ -196,7 +222,7 @@
 
       <!-- 🆕 顯示最新抽獎紀錄 -->
       <div class="col-12 mt-4">
-        <h4>📜 最新抽獎結果（前五筆）</h4>
+        <h4>🎉 幸運榜單揭曉！（前10筆）</h4>
         <ul id="recent-list" style="list-style:none; padding:0; font-size:16px; color:#333;"></ul>
       </div>
 

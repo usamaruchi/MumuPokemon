@@ -82,13 +82,13 @@ function resetAll() {
   codeStatus.textContent = '';
 }
 
-// 🆕 載入最新抽獎紀錄（前 5 筆）
+// 🆕 載入最新抽獎紀錄（前 10 筆）
 async function loadRecentDraws() {
   const { data, error } = await supabase
     .from(TABLE)
     .select('id, group_name, item_name, code_used, created_at')
     .order('id', { ascending: false })
-    .limit(5);
+    .limit(10);
 
   if (error) {
     console.error('載入最新抽獎紀錄失敗:', error);
