@@ -65,9 +65,9 @@ renderGroups();
 // 🎰 抽獎機率邏輯
 function chooseGroup() {
   const rand = Math.random();
-  if (rand < 0.15) return 'A';
-  else if (rand < 0.5) return 'B';
-  else return 'C';
+  if (rand < 0.15) return 'A'; // 15%
+  else if (rand < 0.4) return 'B'; // 25% (0.15 ~ 0.40)
+  else return 'C'; // 60% (0.40 ~ 1.00)
 }
 
 // 🧹 重置狀態
