@@ -7,9 +7,36 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 🎯 群組資料
 const groups = {
-  A: ['皮卡丘', 'A2'],
-  B: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6'],
-  C: ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12'],
+  A: [
+    '瑪夏多',
+    '✨斯魔茶(真品)',
+    '✨來杯茶(真品)',
+    '✨萬聖節的耿鬼(貴重球)',
+    '✨異色的謎擬Ｑ(貴重球)',
+    '自選閃蛋 3 顆',
+  ],
+  B: [
+    '✨蒼炎刃鬼',
+    '✨骨紋巨聲鱷',
+    '✨多龍巴魯托',
+    '✨賽富豪',
+    '✨棄世猴',
+    '自選閃蛋 1 顆',
+  ],
+  C: [
+    '✨鬼斯',
+    '✨怨影娃娃',
+    '✨夜巡靈',
+    '✨飄飄球',
+    '✨花岩怪',
+    '✨燭光靈',
+    '✨泥偶小人',
+    '✨獨劍鞘',
+    '✨小木靈',
+    '✨南瓜精',
+    '✨謎擬Q',
+    '✨墓仔狗',
+  ],
 };
 
 const statusDiv = document.getElementById('status');
@@ -23,9 +50,15 @@ let redeemedCode = null;
 
 // 📋 顯示群組項目
 function renderGroups() {
-  document.getElementById('listA').innerHTML = groups.A.map((i) => `<li>${i}</li>`).join('');
-  document.getElementById('listB').innerHTML = groups.B.map((i) => `<li>${i}</li>`).join('');
-  document.getElementById('listC').innerHTML = groups.C.map((i) => `<li>${i}</li>`).join('');
+  document.getElementById('listA').innerHTML = groups.A.map(
+    (i) => `<li>${i}</li>`
+  ).join('');
+  document.getElementById('listB').innerHTML = groups.B.map(
+    (i) => `<li>${i}</li>`
+  ).join('');
+  document.getElementById('listC').innerHTML = groups.C.map(
+    (i) => `<li>${i}</li>`
+  ).join('');
 }
 renderGroups();
 
@@ -59,7 +92,8 @@ async function loadRecentDraws() {
 
   if (error) {
     console.error('載入最新抽獎紀錄失敗:', error);
-    recentList.innerHTML = '<li style="color:red;">⚠️ 無法載入最新抽獎紀錄</li>';
+    recentList.innerHTML =
+      '<li style="color:red;">⚠️ 無法載入最新抽獎紀錄</li>';
     return;
   }
 
@@ -74,7 +108,9 @@ async function loadRecentDraws() {
       <li>
         🎯 <b>${row.group_name}</b> - ${row.item_name}
         <small style="color:#777;">
-          (${new Date(row.created_at).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })})
+          (${new Date(row.created_at).toLocaleString('zh-TW', {
+            timeZone: 'Asia/Taipei',
+          })})
         </small>
       </li>
     `
@@ -129,7 +165,8 @@ generateBtn.addEventListener('click', async () => {
   statusDiv.style.color = '#555';
 
   const chosenGroup = chooseGroup();
-  const chosenItem = groups[chosenGroup][Math.floor(Math.random() * groups[chosenGroup].length)];
+  const chosenItem =
+    groups[chosenGroup][Math.floor(Math.random() * groups[chosenGroup].length)];
   resultDiv.innerHTML = `🎯 群組：<b>${chosenGroup}</b>　子項目：<b>${chosenItem}</b>`;
 
   const { error } = await supabase.from(TABLE).insert([

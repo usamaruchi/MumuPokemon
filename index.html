@@ -20,6 +20,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      /* outline: 1px red solid; */
     }
 
     body {
@@ -29,13 +30,21 @@
       max-width: 900px;
     }
 
-     .font-style-p {
-      color:#fd4747;
-    }
-
     .font-style-h1 {
       margin-bottom: 20px;
       font-size: 32px;
+    }
+
+    .font-style-p {
+      color: #fd4747;
+    }
+
+    .font-style-span {
+      position: relative;
+      bottom: 2px;
+      font-size: 15px;
+      line-height: 15px;
+      color: #fd4747;
     }
 
     .group-container {
@@ -75,6 +84,11 @@
       justify-items: center;
       /* 讓文字置中 */
     }
+
+    .group2 ul {
+      grid-template-columns: repeat(1, 1fr);
+    }
+
 
     .group li {
       list-style: none;
@@ -150,26 +164,26 @@
       </div>
 
       <div class="col-12">
-        <p class="font-style-p">*每周更新抽獎內容，下次更新時間為 10/27</p>
+        <p class="font-style-p">本次主題為『幽靈寶可夢』，下次更新時間 11/08</p>
       </div>
 
       <div class="col-md-4 py-2">
-        <div class="group">
-          <h2>A 獎（中獎率15%）</h2>
+        <div class="group group2">
+          <h2>A 獎 <span class="font-style-span">(機率20%)</span></h2>
           <ul id="listA"></ul>
         </div>
       </div>
 
       <div class="col-md-4 py-2">
-        <div class="group">
-          <h2>B 獎（中獎率35%）</h2>
+        <div class="group group2">
+          <h2>B 獎 <span class="font-style-span">(機率30%)</span></h2>
           <ul id="listB"></ul>
         </div>
       </div>
 
       <div class="col-md-4 py-2">
-        <div class="group">
-          <h2>C 獎（中獎率50%）</h2>
+        <div class="group ">
+          <h2>C 獎 <span class="font-style-span">(機率50%)</span></h2>
           <ul id="listC"></ul>
         </div>
       </div>
