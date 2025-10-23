@@ -167,7 +167,7 @@ generateBtn.addEventListener('click', async () => {
   const chosenGroup = chooseGroup();
   const chosenItem =
     groups[chosenGroup][Math.floor(Math.random() * groups[chosenGroup].length)];
-  resultDiv.innerHTML = `🎯 群組：<b>${chosenGroup}</b>　子項目：<b>${chosenItem}</b>`;
+  resultDiv.innerHTML = `🎯 獎區：<b>${chosenGroup}</b>　寶可夢：<b>${chosenItem}</b>`;
 
   const { error } = await supabase.from(TABLE).insert([
     {
@@ -183,7 +183,7 @@ generateBtn.addEventListener('click', async () => {
     statusDiv.textContent = '⚠️ 資料儲存失敗。';
     statusDiv.style.color = 'red';
   } else {
-    statusDiv.textContent = '✅ 抽獎結果已儲存！';
+    statusDiv.textContent = '✅ 抽獎結果已記錄！';
     statusDiv.style.color = 'green';
     generateBtn.classList.add('disabled');
 
