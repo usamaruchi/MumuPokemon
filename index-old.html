@@ -10,21 +10,37 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
 
+  <!-- //  給 FB 看的屬性標籤 -->
   <meta property="og:title" content="小木木抽抽屋">
-  <meta property="og:description"
-    content="由「小木木飼育屋」特別打造的寶可夢主題抽獎網頁，定期更新豐富的活動內容，提供各式各樣的寶可夢與限定配信，讓訓練家們都有機會試試手氣、蒐集心儀的寶可夢！每一期都有不同主題與稀有寶可夢登場，活動期間僅限時開放，千萬別錯過屬於你的幸運時刻✨">
-  <meta property="og:site_name" content="小木木抽抽屋">
+  <meta property="og:description" content="由「小木木飼育屋」特別打造的寶可夢主題抽獎網頁，定期更新豐富的活動內容，提供各式各樣的寶可夢與限定配信，讓訓練家們都有機會試試手氣、蒐集心儀的寶可夢！
+每一期都有不同主題與稀有寶可夢登場，活動期間僅限時開放，千萬別錯過屬於你的幸運時刻✨">
+
+  <meta property=" og:site_name" content="小木木抽抽屋">
+
+  <!-- <meta property="og:url" content=""> -->
+  <!-- <meta property="og:image" content=""> -->
+
+  <meta name="description" content="由「小木木飼育屋」特別打造的寶可夢主題抽獎網頁，定期更新豐富的活動內容，提供各式各樣的寶可夢與限定配信，讓訓練家們都有機會試試手氣、蒐集心儀的寶可夢！
+每一期都有不同主題與稀有寶可夢登場，活動期間僅限時開放，千萬別錯過屬於你的幸運時刻✨">
+
+
+  <!-- // 網頁的 favicon，可使用 ico 或是 png 檔 -->
+  <!-- <link rel="icon" type="image/x-icon" href="images/ttlogo.ico"> -->
+  <!-- <link rel="icon" type="image/png" href="images/ttlogo.png"> -->
+  <!-- Apple Touch Icon -->
+  <!-- <link rel="apple-touch-icon" href="images/ttlogo.png"> -->
+
 
   <title>小木木抽抽屋</title>
-
+  <!-- Bootstrap -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
     integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      /* outline: 1px red solid; */
     }
 
     body {
@@ -51,13 +67,21 @@
       color: #fd4747;
     }
 
+    .group-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      gap: 20px;
+    }
+
     .group {
       border: 2px solid #ccc;
       border-radius: 10px;
       padding: 15px;
       background: #fafafa;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      min-height: 260px
+      min-height: 305px
     }
 
     .group h2 {
@@ -69,13 +93,22 @@
     .group ul {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
+      /* grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); */
+      /* grid-template-columns: repeat(3, 1fr); */
+      /* 三欄 */
+
+
+      /* 兩欄排列 */
       gap: 6px 10px;
+      /* 行間距、列間距 */
       justify-items: center;
+      /* 讓文字置中 */
     }
 
     .group2 ul {
       grid-template-columns: repeat(1, 1fr);
     }
+
 
     .group li {
       list-style: none;
@@ -99,75 +132,6 @@
       background: #0056b3;
     }
 
-    /* 群組按鈕樣式 Start */
-    /* 🎨 Group1：紫紅 Fuji-murasaki */
-    .btn[data-group="Group1"] {
-      border-color: #A678B0;
-      color: #A678B0;
-    }
-
-    .btn[data-group="Group1"].active,
-    .btn[data-group="Group1"]:hover,
-    .btn[data-group="Group1"]:focus {
-      background: #A678B0 !important;
-      border-color: #A678B0 !important;
-      color: #fff !important;
-      box-shadow: 0 0 8px rgba(166, 120, 176, 0.4);
-    }
-
-    /* 🎨 Group2：淺藍 Sora-iro */
-    .btn[data-group="Group2"] {
-      border-color: #7EC8E3;
-      color: #5EAFCA;
-    }
-
-    .btn[data-group="Group2"].active,
-    .btn[data-group="Group2"]:hover,
-    .btn[data-group="Group2"]:focus {
-      background: #7EC8E3 !important;
-      border-color: #7EC8E3 !important;
-      color: #fff !important;
-      box-shadow: 0 0 8px rgba(126, 200, 227, 0.4);
-    }
-
-    /* 🎨 Group3：淺粉 Sakura-iro */
-    .btn[data-group="Group3"] {
-      border-color: #F8BBD0;
-      color: #E79CBF;
-    }
-
-    .btn[data-group="Group3"].active,
-    .btn[data-group="Group3"]:hover,
-    .btn[data-group="Group3"]:focus {
-      background: #F8BBD0 !important;
-      border-color: #F8BBD0 !important;
-      color: #fff !important;
-      box-shadow: 0 0 8px rgba(248, 187, 208, 0.4);
-    }
-
-    /* 🟦 統一外觀樣式 */
-    .btn-group .btn {
-      border-radius: 24px !important;
-      padding: 8px 20px;
-      font-weight: 600;
-      margin: 0 6px;
-      transition: all 0.25s ease-in-out;
-      background: white;
-    }
-
-    /* 🚫 移除 Bootstrap 的藍色 active 狀態 */
-    .btn-outline-primary.active,
-    .btn-outline-primary:active,
-    .show>.btn-outline-primary.dropdown-toggle {
-      background: none !important;
-      color: inherit !important;
-      border-color: inherit !important;
-      box-shadow: none !important;
-    }
-
-
-    /* 群組按鈕樣式 End */
-
     .result {
       margin-top: 25px;
       font-size: 20px;
@@ -179,6 +143,7 @@
       font-size: 14px;
     }
 
+    /* 新增代碼輸入欄 */
     .code-section {
       margin: 10px 0 10px 0;
     }
@@ -194,6 +159,7 @@
       opacity: 0.5;
       pointer-events: none;
     }
+
 
     @media(max-width:767px) {
       .group {
@@ -216,28 +182,17 @@
           獎品抽出後無法更換，請訓練家們多多包涵💖<br>
           本期主題是【👻幽靈系寶可夢】<br>
           下次更新時間：11/08，敬請期待！🌙
-        </p>
 
+        </p>
       </div>
 
+      <!-- 🧩 新增：輸入抽獎代碼 -->
       <div class="col-12 code-section">
         <input class="my-2" type="text" id="code-input" placeholder="請輸入抽獎代碼">
         <button id="code-btn">確認代碼</button>
         <div class="status" id="code-status"></div>
       </div>
 
-      <!-- 🆕 切換活動群組 -->
-      <div class="col-12 mb-3">
-        <!-- <div class="my-3" id="excel-status" style="color:#555;font-size:14px;"></div> -->
-
-        <div class="btn-group" role="group" aria-label="Prize Group Selector">
-          <button class="btn btn-outline-primary active" data-group="Group1">朱紫</button>
-          <button class="btn btn-outline-primary" data-group="Group2">劍盾</button>
-          <button class="btn btn-outline-primary" data-group="Group3">珍鑽</button>
-        </div>
-      </div>
-
-      <!-- 🏆 獎項顯示 -->
       <div class="col-md-4 py-2">
         <div class="group group2">
           <h2>A 獎 <span class="font-style-span">(機率15%)</span></h2>
@@ -253,7 +208,7 @@
       </div>
 
       <div class="col-md-4 py-2">
-        <div class="group">
+        <div class="group ">
           <h2>C 獎 <span class="font-style-span">(機率60%)</span></h2>
           <ul id="listC"></ul>
         </div>
@@ -265,18 +220,18 @@
         <div class="status" id="status"></div>
       </div>
 
+      <!-- 🆕 顯示最新抽獎紀錄 -->
       <div class="col-12 mt-4">
         <h4>🎉 幸運榜單揭曉！（前10筆）</h4>
         <ul id="recent-list" style="list-style:none; padding:0; font-size:16px; color:#333;"></ul>
       </div>
+
     </div>
   </div>
 
-  <!-- 🧩 Supabase & SheetJS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="assets/main.js" defer></script>
 
-  <script src="assets/main.js"></script>
 </body>
 
 </html>

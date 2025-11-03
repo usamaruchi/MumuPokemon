@@ -1,0 +1,201 @@
+// ⚙️ Supabase 設定
+const SUPABASE_URL = 'https://fsglwszioporinflhcuk.supabase.co';
+const SUPABASE_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzZ2x3c3ppb3BvcmluZmxoY3VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzI5ODEsImV4cCI6MjA3NjA0ODk4MX0.dhaiVLec5_C5qDzWG3GJ0bbXKrH0E0QyQUN8Q9fcCGk';
+const TABLE = 'random_logs';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 🎯 群組資料
+const groups = {
+  A: [
+    '瑪夏多',
+    '✨斯魔茶(真品)',
+    '✨來杯茶(真品)',
+    '✨萬聖節的耿鬼(貴重球)',
+    '✨異色的謎擬Ｑ(貴重球)',
+    '自選閃蛋 3 顆',
+  ],
+  B: [
+    '✨蒼炎刃鬼',
+    '✨骨紋巨聲鱷',
+    '✨多龍巴魯托',
+    '✨賽富豪',
+    '✨棄世猴',
+    '自選閃蛋 1 顆',
+  ],
+  C: [
+    '✨鬼斯',
+    '✨怨影娃娃',
+    '✨夜巡靈',
+    '✨飄飄球',
+    '✨花岩怪',
+    '✨燭光靈',
+    '✨泥偶小人',
+    '✨獨劍鞘',
+    '✨小木靈',
+    '✨南瓜精',
+    '✨謎擬Q',
+    '✨墓仔狗',
+  ],
+};
+
+const statusDiv = document.getElementById('status');
+const resultDiv = document.getElementById('result');
+const codeBtn = document.getElementById('code-btn');
+const codeInput = document.getElementById('code-input');
+const codeStatus = document.getElementById('code-status');
+const generateBtn = document.getElementById('generate-btn');
+const recentList = document.getElementById('recent-list');
+let redeemedCode = null;
+
+// 📋 顯示群組項目
+function renderGroups() {
+  document.getElementById('listA').innerHTML = groups.A.map(
+    (i) => `<li>${i}</li>`
+  ).join('');
+  document.getElementById('listB').innerHTML = groups.B.map(
+    (i) => `<li>${i}</li>`
+  ).join('');
+  document.getElementById('listC').innerHTML = groups.C.map(
+    (i) => `<li>${i}</li>`
+  ).join('');
+}
+renderGroups();
+
+// 🎰 抽獎機率邏輯
+function chooseGroup() {
+  const rand = Math.random();
+  if (rand < 0.15) return 'A'; // 15%
+  else if (rand < 0.4) return 'B'; // 25% (0.15 ~ 0.40)
+  else return 'C'; // 60% (0.40 ~ 1.00)
+}
+
+// 🧹 重置狀態
+function resetAll() {
+  redeemedCode = null;
+  codeInput.value = '';
+  codeInput.disabled = false;
+  codeBtn.disabled = false;
+  generateBtn.classList.add('disabled');
+  resultDiv.innerHTML = '';
+  statusDiv.textContent = '';
+  codeStatus.textContent = '';
+}
+
+// 🆕 載入最新抽獎紀錄（前 10 筆）
+async function loadRecentDraws() {
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('id, group_name, item_name, code_used, created_at')
+    .order('id', { ascending: false })
+    .limit(10);
+
+  if (error) {
+    console.error('載入最新抽獎紀錄失敗:', error);
+    recentList.innerHTML =
+      '<li style="color:red;">⚠️ 無法載入最新抽獎紀錄</li>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    recentList.innerHTML = '<li style="color:#777;">（目前尚無抽獎紀錄）</li>';
+    return;
+  }
+
+  recentList.innerHTML = data
+    .map(
+      (row) => `
+      <li>
+        🎯 <b>${row.group_name}</b> - ${row.item_name}
+        <small style="color:#777;">
+          (${new Date(row.created_at).toLocaleString('zh-TW', {
+            timeZone: 'Asia/Taipei',
+          })})
+        </small>
+      </li>
+    `
+    )
+    .join('');
+}
+
+// === 抽獎代碼驗證 ===
+codeBtn.addEventListener('click', async () => {
+  const code = codeInput.value.trim();
+  if (!code) {
+    codeStatus.textContent = '請輸入抽獎代碼。';
+    codeStatus.style.color = 'red';
+    return;
+  }
+
+  codeStatus.textContent = '驗證中...';
+  codeStatus.style.color = '#555';
+
+  const { data, error } = await supabase.rpc('redeem_code', { p_code: code });
+
+  if (error) {
+    console.error(error);
+    codeStatus.textContent = '⚠️ 驗證失敗，請稍後再試。';
+    codeStatus.style.color = 'red';
+    return;
+  }
+
+  const ok = data === true || (Array.isArray(data) && data[0] === true);
+  if (ok) {
+    redeemedCode = code;
+    codeStatus.textContent = '✅ 驗證成功！代碼已啟用抽獎資格。';
+    codeStatus.style.color = 'green';
+    generateBtn.classList.remove('disabled');
+    codeInput.disabled = true;
+    codeBtn.disabled = true;
+  } else {
+    codeStatus.textContent = '❌ 代碼不存在或已使用過。';
+    codeStatus.style.color = 'red';
+  }
+});
+
+// === 抽獎 ===
+generateBtn.addEventListener('click', async () => {
+  if (generateBtn.classList.contains('disabled')) {
+    statusDiv.textContent = '⚠️ 請先輸入並驗證抽獎代碼。';
+    statusDiv.style.color = 'red';
+    return;
+  }
+
+  statusDiv.textContent = '⏳ 抽獎中...';
+  statusDiv.style.color = '#555';
+
+  const chosenGroup = chooseGroup();
+  const chosenItem =
+    groups[chosenGroup][Math.floor(Math.random() * groups[chosenGroup].length)];
+  resultDiv.innerHTML = `🎯 獎區：<b>${chosenGroup}</b>　寶可夢：<b>${chosenItem}</b>`;
+
+  const { error } = await supabase.from(TABLE).insert([
+    {
+      group_name: chosenGroup,
+      item_name: chosenItem,
+      code_used: redeemedCode,
+      created_at: new Date().toISOString(),
+    },
+  ]);
+
+  if (error) {
+    console.error(error);
+    statusDiv.textContent = '⚠️ 資料儲存失敗。';
+    statusDiv.style.color = 'red';
+  } else {
+    statusDiv.textContent = '✅ 抽獎結果已記錄！';
+    statusDiv.style.color = 'green';
+    generateBtn.classList.add('disabled');
+
+    // ✅ 成功後立即刷新最新紀錄
+    await loadRecentDraws();
+
+    setTimeout(() => {
+      alert('🎉 抽獎完成！可以輸入新的抽獎代碼再試一次～');
+      resetAll();
+    }, 1500);
+  }
+});
+
+// 🚀 初始載入最新紀錄
+loadRecentDraws();

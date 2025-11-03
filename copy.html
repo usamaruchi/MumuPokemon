@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <!-- //  給 FB 看的屬性標籤 -->
+  <meta property="og:title" content="小木木抽抽屋">
+  <meta property="og:description" content="由「小木木飼育屋」特別打造的寶可夢主題抽獎網頁，定期更新豐富的活動內容，提供各式各樣的寶可夢與限定配信，讓訓練家們都有機會試試手氣、蒐集心儀的寶可夢！
+每一期都有不同主題與稀有寶可夢登場，活動期間僅限時開放，千萬別錯過屬於你的幸運時刻✨">
+
+  <meta property=" og:site_name" content="小木木抽抽屋">
+
+  <!-- <meta property="og:url" content=""> -->
+  <!-- <meta property="og:image" content=""> -->
+
+  <meta name="description" content="由「小木木飼育屋」特別打造的寶可夢主題抽獎網頁，定期更新豐富的活動內容，提供各式各樣的寶可夢與限定配信，讓訓練家們都有機會試試手氣、蒐集心儀的寶可夢！
+每一期都有不同主題與稀有寶可夢登場，活動期間僅限時開放，千萬別錯過屬於你的幸運時刻✨">
+
+
+  <!-- // 網頁的 favicon，可使用 ico 或是 png 檔 -->
+  <!-- <link rel="icon" type="image/x-icon" href="images/ttlogo.ico"> -->
+  <!-- <link rel="icon" type="image/png" href="images/ttlogo.png"> -->
+  <!-- Apple Touch Icon -->
+  <!-- <link rel="apple-touch-icon" href="images/ttlogo.png"> -->
+
+
+  <title>小木木抽抽屋</title>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      /* outline: 1px red solid; */
+    }
+
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      text-align: center;
+      margin: 50px auto;
+      max-width: 900px;
+    }
+
+    .font-style-h1 {
+      margin-bottom: 20px;
+      font-size: 32px;
+    }
+
+    .font-style-p {
+      color: #fd4747;
+    }
+
+    .font-style-span {
+      position: relative;
+      bottom: 2px;
+      font-size: 15px;
+      line-height: 15px;
+      color: #fd4747;
+    }
+
+    .group-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      gap: 20px;
+    }
+
+    .group {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      background: #fafafa;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      min-height: 305px
+    }
+
+    .group h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #333;
+    }
+
+    .group ul {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      /* grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); */
+      /* grid-template-columns: repeat(3, 1fr); */
+      /* 三欄 */
+
+
+      /* 兩欄排列 */
+      gap: 6px 10px;
+      /* 行間距、列間距 */
+      justify-items: center;
+      /* 讓文字置中 */
+    }
+
+    .group2 ul {
+      grid-template-columns: repeat(1, 1fr);
+    }
+
+
+    .group li {
+      list-style: none;
+      padding: 4px 0;
+      font-size: 16px;
+      color: #555;
+    }
+
+    button {
+      padding: 6.5px 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      transition: background 0.2s ease-in-out;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .result {
+      margin-top: 25px;
+      font-size: 20px;
+    }
+
+    .status {
+      margin-top: 15px;
+      color: #555;
+      font-size: 14px;
+    }
+
+    /* 新增代碼輸入欄 */
+    .code-section {
+      margin: 10px 0 10px 0;
+    }
+
+    input[type="text"] {
+      width: 250px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+
+    @media(max-width:767px) {
+      .group {
+        min-height: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="font-style-h1">🏠️小木木抽抽屋</h1>
+      </div>
+
+      <div class="col-12 code-section">
+        <p class="font-style-p">
+          消費滿 300元 ✨即可獲得一次抽獎機會！🎁 <br>
+          獎品抽出後無法更換，請訓練家們多多包涵💖<br>
+          本期主題是【👻幽靈系寶可夢】<br>
+          下次更新時間：11/08，敬請期待！🌙
+
+        </p>
+      </div>
+
+      <!-- 🧩 新增：輸入抽獎代碼 -->
+      <div class="col-12 code-section">
+        <input class="my-2" type="text" id="code-input" placeholder="請輸入抽獎代碼">
+        <button id="code-btn">確認代碼</button>
+        <div class="status" id="code-status"></div>
+      </div>
+
+      <div class="col-md-4 py-2">
+        <div class="group group2">
+          <h2>A 獎 <span class="font-style-span">(機率15%)</span></h2>
+          <ul id="listA"></ul>
+        </div>
+      </div>
+
+      <div class="col-md-4 py-2">
+        <div class="group group2">
+          <h2>B 獎 <span class="font-style-span">(機率25%)</span></h2>
+          <ul id="listB"></ul>
+        </div>
+      </div>
+
+      <div class="col-md-4 py-2">
+        <div class="group ">
+          <h2>C 獎 <span class="font-style-span">(機率60%)</span></h2>
+          <ul id="listC"></ul>
+        </div>
+      </div>
+
+      <div class="col-12 py-4">
+        <button id="generate-btn" class="disabled">抽獎</button>
+        <div class="result" id="result"></div>
+        <div class="status" id="status"></div>
+      </div>
+
+      <!-- 🆕 顯示最新抽獎紀錄 -->
+      <div class="col-12 mt-4">
+        <h4>🎉 幸運榜單揭曉！（前10筆）</h4>
+        <ul id="recent-list" style="list-style:none; padding:0; font-size:16px; color:#333;"></ul>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+  <script>
+    // ⚙️ Supabase 設定
+    const SUPABASE_URL = 'https://fsglwszioporinflhcuk.supabase.co';
+    const SUPABASE_KEY =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzZ2x3c3ppb3BvcmluZmxoY3VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzI5ODEsImV4cCI6MjA3NjA0ODk4MX0.dhaiVLec5_C5qDzWG3GJ0bbXKrH0E0QyQUN8Q9fcCGk';
+    const TABLE = 'random_logs';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 🎯 群組資料
+    const groups = {
+      A: [
+        '瑪夏多',
+        '✨斯魔茶(真品)',
+        '✨來杯茶(真品)',
+        '✨萬聖節的耿鬼(貴重球)',
+        '✨異色的謎擬Ｑ(貴重球)',
+        '自選閃蛋 3 顆',
+      ],
+      B: [
+        '✨蒼炎刃鬼',
+        '✨骨紋巨聲鱷',
+        '✨多龍巴魯托',
+        '✨賽富豪',
+        '✨棄世猴',
+        '自選閃蛋 1 顆',
+      ],
+      C: [
+        '✨鬼斯',
+        '✨怨影娃娃',
+        '✨夜巡靈',
+        '✨飄飄球',
+        '✨花岩怪',
+        '✨燭光靈',
+        '✨泥偶小人',
+        '✨獨劍鞘',
+        '✨小木靈',
+        '✨南瓜精',
+        '✨謎擬Q',
+        '✨墓仔狗',
+      ],
+    };
+
+    const statusDiv = document.getElementById('status');
+    const resultDiv = document.getElementById('result');
+    const codeBtn = document.getElementById('code-btn');
+    const codeInput = document.getElementById('code-input');
+    const codeStatus = document.getElementById('code-status');
+    const generateBtn = document.getElementById('generate-btn');
+    const recentList = document.getElementById('recent-list');
+    let redeemedCode = null;
+
+    // 📋 顯示群組項目
+    function renderGroups() {
+      document.getElementById('listA').innerHTML = groups.A.map(
+        (i) => `<li>${i}</li>`
+      ).join('');
+      document.getElementById('listB').innerHTML = groups.B.map(
+        (i) => `<li>${i}</li>`
+      ).join('');
+      document.getElementById('listC').innerHTML = groups.C.map(
+        (i) => `<li>${i}</li>`
+      ).join('');
+    }
+    renderGroups();
+
+    // 🎰 抽獎機率邏輯
+    function chooseGroup() {
+      const rand = Math.random();
+      if (rand < 0.15) return 'A'; // 15%
+      else if (rand < 0.4) return 'B'; // 25% (0.15 ~ 0.40)
+      else return 'C'; // 60% (0.40 ~ 1.00)
+    }
+
+    // 🧹 重置狀態
+    function resetAll() {
+      redeemedCode = null;
+      codeInput.value = '';
+      codeInput.disabled = false;
+      codeBtn.disabled = false;
+      generateBtn.classList.add('disabled');
+      resultDiv.innerHTML = '';
+      statusDiv.textContent = '';
+      codeStatus.textContent = '';
+    }
+
+    // 🆕 載入最新抽獎紀錄（前 10 筆）
+    async function loadRecentDraws() {
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select('id, group_name, item_name, code_used, created_at')
+        .order('id', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('載入最新抽獎紀錄失敗:', error);
+        recentList.innerHTML =
+          '<li style="color:red;">⚠️ 無法載入最新抽獎紀錄</li>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        recentList.innerHTML = '<li style="color:#777;">（目前尚無抽獎紀錄）</li>';
+        return;
+      }
+
+      recentList.innerHTML = data
+        .map(
+          (row) => `
+      <li>
+        🎯 <b>${row.group_name}</b> - ${row.item_name}
+        <small style="color:#777;">
+          (${new Date(row.created_at).toLocaleString('zh-TW', {
+            timeZone: 'Asia/Taipei',
+          })})
+        </small>
+      </li>
+    `
+        )
+        .join('');
+    }
+
+    // === 抽獎代碼驗證 ===
+    codeBtn.addEventListener('click', async () => {
+      const code = codeInput.value.trim();
+      if (!code) {
+        codeStatus.textContent = '請輸入抽獎代碼。';
+        codeStatus.style.color = 'red';
+        return;
+      }
+
+      codeStatus.textContent = '驗證中...';
+      codeStatus.style.color = '#555';
+
+      const { data, error } = await supabase.rpc('redeem_code', { p_code: code });
+
+      if (error) {
+        console.error(error);
+        codeStatus.textContent = '⚠️ 驗證失敗，請稍後再試。';
+        codeStatus.style.color = 'red';
+        return;
+      }
+
+      const ok = data === true || (Array.isArray(data) && data[0] === true);
+      if (ok) {
+        redeemedCode = code;
+        codeStatus.textContent = '✅ 驗證成功！代碼已啟用抽獎資格。';
+        codeStatus.style.color = 'green';
+        generateBtn.classList.remove('disabled');
+        codeInput.disabled = true;
+        codeBtn.disabled = true;
+      } else {
+        codeStatus.textContent = '❌ 代碼不存在或已使用過。';
+        codeStatus.style.color = 'red';
+      }
+    });
+
+    // === 抽獎 ===
+    generateBtn.addEventListener('click', async () => {
+      if (generateBtn.classList.contains('disabled')) {
+        statusDiv.textContent = '⚠️ 請先輸入並驗證抽獎代碼。';
+        statusDiv.style.color = 'red';
+        return;
+      }
+
+      statusDiv.textContent = '⏳ 抽獎中...';
+      statusDiv.style.color = '#555';
+
+      const chosenGroup = chooseGroup();
+      const chosenItem =
+        groups[chosenGroup][Math.floor(Math.random() * groups[chosenGroup].length)];
+      resultDiv.innerHTML = `🎯 獎區：<b>${chosenGroup}</b>　寶可夢：<b>${chosenItem}</b>`;
+
+      const { error } = await supabase.from(TABLE).insert([
+        {
+          group_name: chosenGroup,
+          item_name: chosenItem,
+          code_used: redeemedCode,
+          created_at: new Date().toISOString(),
+        },
+      ]);
+
+      if (error) {
+        console.error(error);
+        statusDiv.textContent = '⚠️ 資料儲存失敗。';
+        statusDiv.style.color = 'red';
+      } else {
+        statusDiv.textContent = '✅ 抽獎結果已記錄！';
+        statusDiv.style.color = 'green';
+        generateBtn.classList.add('disabled');
+
+        // ✅ 成功後立即刷新最新紀錄
+        await loadRecentDraws();
+
+        setTimeout(() => {
+          alert('🎉 抽獎完成！可以輸入新的抽獎代碼再試一次～');
+          resetAll();
+        }, 1500);
+      }
+    });
+
+    // 🚀 初始載入最新紀錄
+    loadRecentDraws();
+
+  </script>
+
+</body>
+
+</html>
