@@ -111,7 +111,8 @@
       const groupNames = {
         Group1: '朱紫',
         Group2: '劍盾',
-        Group3: '珍鑽'
+        Group3: '珍鑽',
+        Group4: 'ZA'
       };
 
       recentList.innerHTML = data.map(row => {
