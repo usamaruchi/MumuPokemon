@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>小木木・會員資料庫</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="data.js" defer></script>
+  <script src="data-policy.js" defer></script>
+  <script src="import-excel.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="./index.html"><span class="brand-icon" aria-hidden="true">m.</span><span>小木木<span class="brand-sub">會員資料庫</span></span></a>
+    <div class="nav-label">資料瀏覽</div>
+    <nav id="category-nav" aria-label="遊戲分類"></nav>
+    <div class="sidebar-foot"><span class="status-dot"></span>本機資料試作版<small>依帳號串起每一段冒險。</small></div>
+  </aside>
+  <main>
+    <header class="topbar"><span>小木木飼育屋 <span class="slash">/</span> 會員管理</span><span class="edition">PREVIEW 01</span></header>
+    <section class="intro"><div><div class="eyebrow">TRAINER DIRECTORY</div><h1>找到會員的每一段冒險<span>。</span></h1><p>一個帳號，查看所有遊戲角色與相關紀錄。</p></div><div class="intro-art" aria-hidden="true"><div class="orbit"></div><div class="pokeball"></div><i class="spark a">✦</i><i class="spark b">✧</i></div></section>
+    <section id="stats" class="stats" aria-label="資料統計"></section>
+    <section class="data-tools" aria-label="自行新增會員">
+      <div><strong>新增人員名單</strong><p>下載 Excel，在「新增人員」填寫後匯入。每一列是一個遊戲角色，同帳號會自動整合。</p><small>匯入資料儲存在目前瀏覽器；換裝置或清除瀏覽資料後，請重新匯入保留的 Excel。</small></div>
+      <div class="data-actions"><a class="download-template" href="outputs/member-template/會員名單.xlsx" download>下載 Excel 名單</a><button id="import-excel" class="primary" type="button">匯入 Excel</button><input id="import-file" type="file" accept=".xlsx" hidden></div>
+      <p id="import-status" class="import-status" role="status" aria-live="polite"></p>
+    </section>
+    <section id="workspace" class="workspace" aria-label="會員查詢">
+      <div class="workspace-title"><div><h2 id="view-title">全部會員</h2><p id="view-subtitle">跨遊戲整合查詢</p></div><button id="reset" class="text-button" type="button">重設篩選 ↺</button></div>
+      <form id="search-form" role="search" class="search-form"><label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="搜尋帳號、角色名字、里 ID、表 ID 或備註…" aria-label="搜尋會員"><kbd>/</kbd></label><button class="primary" type="submit">搜尋會員</button></form>
+      <div class="filters"><label>版本<select id="version"><option value="">全部版本</option></select></label><label>國籍<select id="nationality"><option value="">全部國籍</option></select></label><label>身分<select id="role"><option value="">全部身分</option></select></label><label>性別<select id="gender"><option value="">全部性別</option><option value="♂">♂ 男</option><option value="♀">♀ 女</option></select></label><label class="toggle"><input id="cross-only" type="checkbox">僅看跨遊戲帳號</label></div>
+      <div class="result-bar"><p id="result-count" role="status" aria-live="polite"></p><label>排序<select id="sort"><option value="games">遊戲數最多</option><option value="records">紀錄數最多</option><option value="account">帳號名稱</option></select></label></div>
+      <div id="members" class="member-grid"></div>
+      <div id="empty" class="empty" hidden><span aria-hidden="true">⌕</span><h3>找不到符合的會員</h3><p>試試較短的帳號、不同名字，或重設篩選條件。</p><button id="empty-reset" class="primary" type="button">重設篩選</button></div>
+      <nav class="pagination" aria-label="會員分頁"><span id="page-info"></span><div><button id="previous" type="button">← 上一頁</button><button id="next" type="button">下一頁 →</button></div></nav>
+    </section>
+    <footer>同帳號自動整合；已確認的本人角色另行歸戶。其他未填帳號的角色各自保留，可開啟詳細資料回查 Excel 來源列。</footer>
+  </main>
+  <dialog id="detail" aria-labelledby="detail-title"><div class="dialog-header"><div><div class="eyebrow">MEMBER PROFILE</div><h2 id="detail-title"></h2></div><button id="close-detail" class="close-button" aria-label="關閉會員詳細資料" type="button">×</button></div><div id="detail-body"></div></dialog>
+</body>
+</html>
