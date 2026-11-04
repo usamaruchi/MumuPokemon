@@ -54,6 +54,16 @@ for (const sheet of source.sheets.filter(s => s.hidden && s.name !== '寶可夢�
     activities.push({id: `${sheet.name}-${row.row}`, source: sheet.name, row: row.row, accounts: [...new Set([account, ig].filter(Boolean))], fields});
   }
 }
-const data = { categories, records, activities, meta: { source: 'Poke訂單.xlsx', recordCount: records.length, activityCount: activities.length, skipped, excludedVersions: MemberPolicy.excludedVersions, removedVersionCount: skipped.filter(item=>item.reason==='依指定版本移除').length, excludedSheets: ['寶可夢練怪'], grouping: '帳號去除頭尾空白、忽略大小寫；空帳號各自保留', credentialsExcluded: true } };
+const additionsPath = path.join(directory, 'additional-records.json');
+const additions = fs.existsSync(additionsPath) ? JSON.parse(fs.readFileSync(additionsPath, 'utf8')) : [];
+const known = new Set(records.map(MemberPolicy.fingerprint));
+for (const addition of additions) {
+  const record = MemberPolicy.applyOwnership(addition);
+  const key = MemberPolicy.fingerprint(record);
+  if (MemberPolicy.isExcluded(record.version) || known.has(key)) continue;
+  if (!categories.includes(record.category)) throw new Error(`Invalid additional record category: ${record.category}`);
+  records.push(record); known.add(key);
+}
+const data = { categories, records, activities, meta: { source: 'Poke訂單.xlsx', additionalSource: 'additional-records.json', recordCount: records.length, activityCount: activities.length, skipped, excludedVersions: MemberPolicy.excludedVersions, removedVersionCount: skipped.filter(item=>item.reason==='依指定版本移除').length, excludedSheets: ['寶可夢練怪'], grouping: '帳號去除頭尾空白、忽略大小寫；空帳號各自保留', credentialsExcluded: true } };
 fs.writeFileSync(path.join(directory, 'data.js'), `/* Generated from the supplied workbook. Passwords are excluded. */\nwindow.MEMBER_DATA = ${JSON.stringify(data).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')};\n`);
 console.log(JSON.stringify({records: records.length, activities: activities.length, skipped, categories: Object.fromEntries(categories.map(c => [c, records.filter(r => r.category === c).length]))}, null, 2));

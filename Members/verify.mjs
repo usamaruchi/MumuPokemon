@@ -13,7 +13,7 @@ vm.runInContext(fs.readFileSync(path.join(directory, 'app.js'), 'utf8'), context
 const data = context.window.MEMBER_DATA;
 const {buildMembers, filterMembers} = context.MemberDirectory;
 const members = buildMembers(data);
-assert.equal(data.records.length, 587);
+assert.equal(data.records.length, 588);
 assert.equal(data.meta.removedVersionCount,10);
 assert(data.records.every(record=>!context.MemberPolicy.isExcluded(record.version)));
 assert.equal(new Set(data.records.map(record => record.id)).size, data.records.length);
