@@ -2,7 +2,7 @@
   const excludedVersions = ['太陽', '白金', '究極日', '究極月', '城都', '豐原', '關都', 'Y'];
   const isExcluded = version => excludedVersions.includes(String(version ?? '').trim().toUpperCase());
   // Remove only the source rows explicitly selected by the user; similar rows stay.
-  const removedRecordIds = ['珍鑽-5','珍鑽-6','珍鑽-9','珍鑽-3','皮伊&GO-4','劍盾-6','劍盾-8','劍盾-224','劍盾-226','劍盾-227','劍盾-237'];
+  const removedRecordIds = ['珍鑽-5','珍鑽-6','珍鑽-9','珍鑽-3','皮伊&GO-4','劍盾-6','劍盾-8','劍盾-224','劍盾-226','劍盾-227','劍盾-237','朱紫-60'];
   const isRemovedRecord = record => removedRecordIds.includes(record.id) || removedRecordIds.includes(`${record.source}-${record.row}`);
   const isExcludedRecord = record => isExcluded(record.version) || isRemovedRecord(record);
   const fields = [['category','分類'],['account','帳號'],['internalId','里ID'],['trainerId','表ID'],['name','名字'],['gender','性別'],['version','版本'],['nationality','國籍'],['role','身分'],['notes','備註'],['method','方式'],['channel','渠道'],['contact','聯絡稱呼'],['date','日期'],['email','信箱']];

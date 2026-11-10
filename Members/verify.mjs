@@ -13,8 +13,9 @@ vm.runInContext(fs.readFileSync(path.join(directory, 'app.js'), 'utf8'), context
 const data = context.window.MEMBER_DATA;
 data.records = data.records.map(context.MemberPolicy.applyOwnership);
 const {buildMembers, filterMembers} = context.MemberDirectory;
+assert.equal(data.records.filter(r=>r.internalId==='1686' && r.trainerId==='425142' && r.account==='andy9511060').length,1);
 const members = buildMembers(data);
-assert.equal(data.records.length, 578);
+assert.equal(data.records.length, 577);
 assert.equal(data.activities.length,0);
 assert(data.activities.every(activity=>!['抽抽屋','龍年閃蛋','IG追蹤領閃蛋','蛇年的阿柏怪'].includes(activity.source)));
 assert(data.records.every(record=>!context.MemberPolicy.isRemovedRecord(record)));
@@ -102,9 +103,13 @@ try {
   assert.doesNotMatch(await page.locator('#detail-body').textContent(),/皮伊主機/);
   await page.locator('#close-detail').click();
   assert.match(await page.locator('#stats').textContent(),/待確認歸屬9/);
+  assert.deepEqual(await page.locator('#category-filter option').allTextContents(),['全部會員','HOME','朱紫','劍盾','珍鑽','ZA','阿爾宙斯','皮伊','GO']);
+  await page.locator('#category-filter').selectOption('珍鑽');
+  assert.equal(await page.locator('[data-category="珍鑽"]').getAttribute('aria-pressed'),'true');
   await page.locator('[data-category="阿爾宙斯"]').click();
-  assert.equal(await page.locator('#version option[value="阿爾宙斯"]').count(),1);
-  await page.locator('#version').selectOption('阿爾宙斯');
+  assert.equal(await page.locator('#category-filter').inputValue(),'阿爾宙斯');
+  assert.equal(await page.locator('#category-filter option[value="阿爾宙斯"]').count(),1);
+  await page.locator('#category-filter').selectOption('阿爾宙斯');
   assert((await page.locator('.member-card').count())>0);
   await page.locator('#reset').click();
   const outputDirectory = process.argv.find(arg=>arg.startsWith('--output='))?.slice(9);

@@ -11,3 +11,19 @@
 @media(max-width:760px){.sidebar-updated{margin:0;padding:0 0 12px;font-size:11px}}
 
 .nav-icon svg{width:17px;height:17px;display:block}.nav-icon{flex-shrink:0}
+
+/* Keep corresponding columns aligned across all member detail tables. */
+.game-table,.home-table{table-layout:fixed;min-width:760px}
+.game-table .column-internalId{width:13%}
+.game-table .column-trainerId{width:16%}
+.game-table .column-name{width:23%}
+.game-table .column-gender{width:10%}
+.game-table .column-version{width:13%}
+.game-table .column-nationality{width:13%}
+.game-table .column-role{width:12%}
+.home-table .column-name{width:24%}
+.home-table .column-method{width:20%}
+.home-table .column-channel{width:16%}
+.home-table .column-contact{width:22%}
+.home-table .column-date{width:18%}
+.game-table td,.game-table th,.home-table td,.home-table th{vertical-align:middle;white-space:normal;overflow-wrap:anywhere;line-height:1.6}

@@ -6,11 +6,11 @@
   <meta name="color-scheme" content="light">
   <title>小木木・會員資料庫</title>
   <link rel="icon" href="favicon.ico?v=transparent" type="image/x-icon" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261110-category-3">
   <script src="data.js" defer></script>
   <script src="data-policy.js" defer></script>
   <script src="import-excel.js" defer></script>
-  <script src="app.js" defer></script>
+  <script src="app.js?v=20261110-category-3" defer></script>
 </head>
 <body>
   <aside class="sidebar">
@@ -34,7 +34,7 @@
     <section id="workspace" class="workspace" aria-label="會員查詢">
       <div class="workspace-title"><div><h2 id="view-title">全部會員</h2><p id="view-subtitle">跨遊戲整合查詢</p></div><button id="reset" class="text-button" type="button">重設篩選 ↺</button></div>
       <form id="search-form" role="search" class="search-form"><label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="搜尋帳號、角色名字、里 ID、表 ID 或備註…" aria-label="搜尋會員"><kbd>/</kbd></label><button class="primary" type="submit">搜尋會員</button></form>
-      <div class="filters"><label>版本<select id="version"><option value="">全部版本</option></select></label><label>國籍<select id="nationality"><option value="">全部國籍</option></select></label><label class="toggle"><input id="cross-only" type="checkbox">僅看跨遊戲帳號</label></div>
+      <div class="filters"><label>分類<select id="category-filter"><option value="">全部會員</option></select></label><label>國籍<select id="nationality"><option value="">全部國籍</option></select></label><label class="toggle"><input id="cross-only" type="checkbox">僅看跨遊戲帳號</label></div>
       <div class="result-bar"><p id="result-count" role="status" aria-live="polite"></p><label>排序<select id="sort"><option value="games">遊戲數最多</option><option value="records">紀錄數最多</option><option value="account">帳號名稱</option></select></label></div>
       <div id="members" class="member-grid"></div>
       <div id="empty" class="empty" hidden><span aria-hidden="true">⌕</span><h3>找不到符合的會員</h3><p>試試較短的帳號、不同名字，或重設篩選條件。</p><button id="empty-reset" class="primary" type="button">重設篩選</button></div>

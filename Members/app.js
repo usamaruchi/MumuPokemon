@@ -67,24 +67,16 @@
   const $ = id => document.getElementById(id), e = escapeHtml;
   let category = '', page = 1, lastTrigger = null;
   const pageSize = 12;
-  const filters = () => ({query:$('search').value, category, version:$('version').value, nationality:$('nationality').value, crossOnly:$('cross-only').checked, sort:$('sort').value});
+  const filters = () => ({query:$('search').value, category, nationality:$('nationality').value, crossOnly:$('cross-only').checked, sort:$('sort').value});
   const badge = game => `<span class="badge game-${e(game)}">${e(game)}</span>`;
   const countLabel = number => number.toLocaleString('zh-TW');
-  const versionOrder = ['紫','朱','劍','盾','鑽石','珍珠','ZA','阿爾宙斯','伊布','皮卡丘','GO'];
   function populateFilters() {
-    for (const [field,label] of [['version','版本'],['nationality','國籍']]) {
-      const selected = $(field).value;
-      const values = unique(data.records.filter(record => !category || record.category === category).map(record => record[field])).sort((a,b) => {
-        if (field === 'version') {
-          const rank = value => { const index = versionOrder.indexOf(value); return index < 0 ? versionOrder.length : index; };
-          const difference = rank(a) - rank(b);
-          if (difference) return difference;
-        }
-        return a.localeCompare(b,'zh-Hant');
-      });
-      $(field).innerHTML = `<option value="">全部${label}</option>` + values.map(value => `<option value="${e(value)}">${e(value)}</option>`).join('');
-      $(field).value = values.includes(selected) ? selected : '';
-    }
+    $('category-filter').innerHTML = '<option value="">全部會員</option>' + data.categories.map(value => `<option value="${e(value)}">${e(value)}</option>`).join('');
+    $('category-filter').value = category;
+    const selected = $('nationality').value;
+    const values = unique(data.records.filter(record => !category || record.category === category).map(record => record.nationality)).sort((a,b) => a.localeCompare(b,'zh-Hant'));
+    $('nationality').innerHTML = '<option value="">全部國籍</option>' + values.map(value => `<option value="${e(value)}">${e(value)}</option>`).join('');
+    $('nationality').value = values.includes(selected) ? selected : '';
   }
   function renderNav() {
     const icons = {
@@ -131,7 +123,7 @@
   function reset() {
     category = ''; page = 1;
     $('search-form').reset();
-    for (const field of ['version','nationality']) $(field).value = '';
+    $('nationality').value = '';
     $('cross-only').checked = false; $('sort').value = 'games';
     populateFilters(); renderNav(); render();
   }
@@ -145,7 +137,7 @@
       const records = member.records.filter(record => record.category === game);
       const home = game === 'HOME';
       const columns = home ? [['name','名字'],['method','方式'],['channel','渠道'],['contact','聯絡稱呼'],['date','日期']] : [['internalId','里ID'],['trainerId','表ID'],['name','名字'],['gender','性別'],['version','版本'],['nationality','國籍'],['role','身分']];
-      html += `<section class="detail-section"><h3>${e(game)} <span class="source-tag">${records.length} 筆</span></h3><div class="table-scroll"><table><thead><tr>${columns.map(([,label])=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${records.map(record => `<tr>${columns.map(([field]) => `<td>${e(record[field]) || '—'}</td>`).join('')}</tr>${record.notes || record.email ? `<tr class="note-row"><td colspan="${columns.length}">${record.notes ? `備註：${e(record.notes).replace(/\n/g,'<br>')}` : ''}${record.notes && record.email ? '<br>' : ''}${record.email ? `信箱：${e(record.email)}` : ''}</td></tr>` : ''}`).join('')}</tbody></table></div></section>`;
+      html += `<section class="detail-section"><h3>${e(game)} <span class="source-tag">${records.length} 筆</span></h3><div class="table-scroll"><table class="${home ? 'home-table' : 'game-table'}"><colgroup>${columns.map(([field])=>`<col class="column-${field}">`).join('')}</colgroup><thead><tr>${columns.map(([,label])=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${records.map(record => `<tr>${columns.map(([field]) => `<td>${e(record[field]) || '—'}</td>`).join('')}</tr>${record.notes || record.email ? `<tr class="note-row"><td colspan="${columns.length}">${record.notes ? `備註：${e(record.notes).replace(/\n/g,'<br>')}` : ''}${record.notes && record.email ? '<br>' : ''}${record.email ? `信箱：${e(record.email)}` : ''}</td></tr>` : ''}`).join('')}</tbody></table></div></section>`;
     }
     if (member.activities.length) html += `<section class="detail-section"><h3>相關活動紀錄</h3>${member.activities.map(activity => `<article class="activity"><strong>${e(activity.source)}</strong><span class="source-tag">第 ${activity.row} 列</span><p>${Object.entries(activity.fields).map(([label,value]) => `${e(label)}：${e(value)}`).join('　／　')}</p></article>`).join('')}<p class="profile-note">活動依原表的帳號或 IG 帳號關聯，保留原始紀錄；活動紀錄中的不同帳號尚未自動合併。</p></section>`;
     $('detail-body').innerHTML = html;
@@ -164,7 +156,8 @@
   $('members').addEventListener('click', event => { const button = event.target.closest('[data-member]'); if (button) showMember(button.dataset.member, button); });
   $('search-form').addEventListener('submit', event => { event.preventDefault(); page = 1; render(); });
   $('search').addEventListener('input', () => { page = 1; render(); });
-  for (const id of ['version','nationality','cross-only','sort']) $(id).addEventListener('change', () => { page = 1; render(); });
+  $('category-filter').addEventListener('change', () => { category = $('category-filter').value; page = 1; populateFilters(); renderNav(); render(); });
+  for (const id of ['nationality','cross-only','sort']) $(id).addEventListener('change', () => { page = 1; render(); });
   for (const id of ['reset','empty-reset']) $(id).addEventListener('click', reset);
   for (const [id,offset] of [['previous',-1],['next',1]]) $(id).addEventListener('click', () => { page += offset; render(); $('workspace')?.scrollIntoView(); });
   $('close-detail').addEventListener('click', () => $('detail').close());
