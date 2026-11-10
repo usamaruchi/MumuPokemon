@@ -51,13 +51,13 @@
   if (typeof document === 'undefined') return;
   const data = window.MEMBER_DATA;
   if (!data) { document.getElementById('members').textContent = '無法讀取會員資料，請確認 data.js 與網頁位於同一個資料夾。'; return; }
-  data.records = data.records.filter(record=>!MemberPolicy.isExcluded(record.version)).map(MemberPolicy.applyOwnership);
+  data.records = data.records.filter(record=>!MemberPolicy.isExcludedRecord(record)).map(MemberPolicy.applyOwnership);
   const storageKey = 'mumu-members-imported-v1';
   let imported = [], storageMessage = '';
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
     if (!Array.isArray(saved)) throw new Error('資料格式錯誤');
-    imported = saved.filter(record=>record && typeof record==='object' && typeof record.account==='string' && typeof record.name==='string' && !MemberPolicy.isExcluded(record.version)).map(MemberPolicy.applyOwnership).filter(record=>data.categories.includes(record.category));
+    imported = saved.filter(record=>record && typeof record==='object' && typeof record.account==='string' && typeof record.name==='string' && !MemberPolicy.isExcludedRecord(record)).map(MemberPolicy.applyOwnership).filter(record=>data.categories.includes(record.category));
     const known = new Set(data.records.map(MemberPolicy.fingerprint));
     imported = imported.filter(record=>{const key=MemberPolicy.fingerprint(record);if(known.has(key))return false;known.add(key);return true;});
     data.records.push(...imported);
@@ -67,20 +67,38 @@
   const $ = id => document.getElementById(id), e = escapeHtml;
   let category = '', page = 1, lastTrigger = null;
   const pageSize = 12;
-  const filters = () => ({query:$('search').value, category, version:$('version').value, nationality:$('nationality').value, role:$('role').value, gender:$('gender').value, crossOnly:$('cross-only').checked, sort:$('sort').value});
+  const filters = () => ({query:$('search').value, category, version:$('version').value, nationality:$('nationality').value, crossOnly:$('cross-only').checked, sort:$('sort').value});
   const badge = game => `<span class="badge game-${e(game)}">${e(game)}</span>`;
   const countLabel = number => number.toLocaleString('zh-TW');
+  const versionOrder = ['紫','朱','劍','盾','鑽石','珍珠','ZA','阿爾宙斯','伊布','皮卡丘','GO'];
   function populateFilters() {
-    for (const [field,label] of [['version','版本'],['nationality','國籍'],['role','身分']]) {
+    for (const [field,label] of [['version','版本'],['nationality','國籍']]) {
       const selected = $(field).value;
-      const values = unique(data.records.filter(record => !category || record.category === category).map(record => record[field])).sort((a,b) => a.localeCompare(b,'zh-Hant'));
+      const values = unique(data.records.filter(record => !category || record.category === category).map(record => record[field])).sort((a,b) => {
+        if (field === 'version') {
+          const rank = value => { const index = versionOrder.indexOf(value); return index < 0 ? versionOrder.length : index; };
+          const difference = rank(a) - rank(b);
+          if (difference) return difference;
+        }
+        return a.localeCompare(b,'zh-Hant');
+      });
       $(field).innerHTML = `<option value="">全部${label}</option>` + values.map(value => `<option value="${e(value)}">${e(value)}</option>`).join('');
       $(field).value = values.includes(selected) ? selected : '';
     }
   }
   function renderNav() {
-    const initials = ['全','H','朱','劍','Z','阿','珍','皮','G'];
-    $('category-nav').innerHTML = ['', ...data.categories].map((value,index) => `<button type="button" class="nav-button ${category === value ? 'active' : ''}" data-category="${e(value)}" aria-pressed="${category === value}"><span class="nav-icon">${initials[index]}</span>${e(value || '全部會員')}<span class="nav-count">${countLabel(value ? members.filter(member => member.games.includes(value)).length : members.length)}</span></button>`).join('');
+    const icons = {
+      '': '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+      HOME: '<path d="m3 10 9-7 9 7M5 9v11h14V9M9 20v-7h6v7"/>',
+      '朱紫': '<circle cx="8" cy="14" r="5"/><circle cx="16" cy="12" r="2.5"/><circle cx="19" cy="16" r="2.5"/><circle cx="14" cy="17" r="2.5"/><circle cx="17" cy="20" r="2"/><path d="M8 9V6m0 0c0-3 5-3 5-3 0 3-2 4-5 3m8 3V6"/>',
+      '劍盾': '<path d="m4 3 7 7-2 2-7-7V3h2Zm4 10 4-4m-5 3-4 7m-1-2 3 3m12-11 5 2v5c0 3-5 6-5 6s-5-3-5-6v-5l5-2Z"/>',
+      '珍鑽': '<path d="m3 8 4-5h10l4 5-9 13L3 8Zm0 0h18M7 3l5 18 5-18M7 3l5 5 5-5"/>',
+      ZA: '<path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Zm7 12 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15ZM3 18v3m-1.5-1.5h3"/>',
+      '阿爾宙斯': '<ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(-30 12 12)"/><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2Z"/>',
+      '皮伊': '<path d="m13 2-9 12h7l-1 8 10-13h-8l1-7Z"/>',
+      GO: '<circle cx="12" cy="12" r="9"/><path d="M3 12h6m6 0h6"/><circle cx="12" cy="12" r="3"/>'
+    };
+    $('category-nav').innerHTML = ['', ...data.categories].map(value => `<button type="button" class="nav-button ${category === value ? 'active' : ''}" data-category="${e(value)}" aria-pressed="${category === value}"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false">${icons[value] || icons['']}</svg></span>${e(value || '全部會員')}<span class="nav-count">${countLabel(value ? members.filter(member => member.games.includes(value)).length : members.length)}</span></button>`).join('');
   }
   function renderStats() {
   const stats = [
@@ -113,7 +131,7 @@
   function reset() {
     category = ''; page = 1;
     $('search-form').reset();
-    for (const field of ['version','nationality','role','gender']) $(field).value = '';
+    for (const field of ['version','nationality']) $(field).value = '';
     $('cross-only').checked = false; $('sort').value = 'games';
     populateFilters(); renderNav(); render();
   }
@@ -122,13 +140,12 @@
     if (!member) return;
     lastTrigger = trigger;
     $('detail-title').textContent = member.isOwner ? member.displayName : member.account || `${member.names[0] || '未命名角色'}（待確認歸屬）`;
-    const profileNote = member.isOwner ? `已由本人確認：${MemberPolicy.ownerNames.map(name=>`「${name}」`).join('、')}與原身分為「胖丁」的紀錄，均屬於同一人。胖丁的身分已改為「本人」，原始帳號與角色 ID 均保留。` : member.account ? '以下顯示此帳號的全部資料，包含本次篩選以外的遊戲。其他會員不會僅因角色同名而自動合併。' : '原始資料未提供帳號，此筆獨立保留，尚未與其他同名角色建立關聯。';
-    let html = `<div class="profile-summary">${member.games.map(badge).join('')}<span>${member.records.length} 筆遊戲角色 · ${member.activities.length} 筆活動紀錄</span>${member.account ? '<button class="copy-button" type="button" id="copy-account">複製帳號</button>' : ''}</div><p class="profile-note">${profileNote}</p>`;
+    let html = `<div class="profile-summary">${member.games.map(badge).join('')}<span>${member.records.length} 筆遊戲角色 · ${member.activities.length} 筆活動紀錄</span>${member.account ? '<button class="copy-button" type="button" id="copy-account">複製帳號</button>' : ''}</div>`;
     for (const game of member.games) {
       const records = member.records.filter(record => record.category === game);
       const home = game === 'HOME';
       const columns = home ? [['name','名字'],['method','方式'],['channel','渠道'],['contact','聯絡稱呼'],['date','日期']] : [['internalId','里ID'],['trainerId','表ID'],['name','名字'],['gender','性別'],['version','版本'],['nationality','國籍'],['role','身分']];
-      html += `<section class="detail-section"><h3>${e(game)} <span class="source-tag">${records.length} 筆</span></h3><div class="table-scroll"><table><thead><tr>${columns.map(([,label])=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${records.map(record => `<tr>${columns.map(([field]) => `<td>${e(record[field]) || '—'}</td>`).join('')}</tr><tr class="note-row"><td colspan="${columns.length}">${record.notes ? `備註：${e(record.notes).replace(/\n/g,'<br>')}<br>` : ''}${record.email ? `信箱：${e(record.email)}<br>` : ''}${record.account ? `帳號：${e(record.account)}　` : ''}<span class="source-tag">來源：${e(record.source)} · 第 ${record.row} 列</span></td></tr>`).join('')}</tbody></table></div></section>`;
+      html += `<section class="detail-section"><h3>${e(game)} <span class="source-tag">${records.length} 筆</span></h3><div class="table-scroll"><table><thead><tr>${columns.map(([,label])=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${records.map(record => `<tr>${columns.map(([field]) => `<td>${e(record[field]) || '—'}</td>`).join('')}</tr>${record.notes || record.email ? `<tr class="note-row"><td colspan="${columns.length}">${record.notes ? `備註：${e(record.notes).replace(/\n/g,'<br>')}` : ''}${record.notes && record.email ? '<br>' : ''}${record.email ? `信箱：${e(record.email)}` : ''}</td></tr>` : ''}`).join('')}</tbody></table></div></section>`;
     }
     if (member.activities.length) html += `<section class="detail-section"><h3>相關活動紀錄</h3>${member.activities.map(activity => `<article class="activity"><strong>${e(activity.source)}</strong><span class="source-tag">第 ${activity.row} 列</span><p>${Object.entries(activity.fields).map(([label,value]) => `${e(label)}：${e(value)}`).join('　／　')}</p></article>`).join('')}<p class="profile-note">活動依原表的帳號或 IG 帳號關聯，保留原始紀錄；活動紀錄中的不同帳號尚未自動合併。</p></section>`;
     $('detail-body').innerHTML = html;
@@ -147,7 +164,7 @@
   $('members').addEventListener('click', event => { const button = event.target.closest('[data-member]'); if (button) showMember(button.dataset.member, button); });
   $('search-form').addEventListener('submit', event => { event.preventDefault(); page = 1; render(); });
   $('search').addEventListener('input', () => { page = 1; render(); });
-  for (const id of ['version','nationality','role','gender','cross-only','sort']) $(id).addEventListener('change', () => { page = 1; render(); });
+  for (const id of ['version','nationality','cross-only','sort']) $(id).addEventListener('change', () => { page = 1; render(); });
   for (const id of ['reset','empty-reset']) $(id).addEventListener('click', reset);
   for (const [id,offset] of [['previous',-1],['next',1]]) $(id).addEventListener('click', () => { page += offset; render(); $('workspace')?.scrollIntoView(); });
   $('close-detail').addEventListener('click', () => $('detail').close());
@@ -183,7 +200,7 @@
         members = buildMembers(data); byId = new Map(members.map(member=>[member.id,member]));
         reset(); renderStats();
       }
-      status.textContent = `匯入完成：新增 ${added.length} 筆，略過 ${result.records.length-added.length} 筆完全重複資料${result.excluded ? `、${result.excluded} 筆已移除版本` : ''}。新增名單已儲存在目前瀏覽器。`;
+      status.textContent = `匯入完成：新增 ${added.length} 筆，略過 ${result.records.length-added.length} 筆完全重複資料${result.excluded ? `、${result.excluded} 筆已移除資料` : ''}。新增名單已儲存在目前瀏覽器。`;
     } catch(error) { status.textContent = error.message || 'Excel 無法讀取，請使用網頁提供的範本。'; status.classList.add('import-error'); }
     finally { button.disabled = false; event.target.value = ''; }
   });

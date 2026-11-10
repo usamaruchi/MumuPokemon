@@ -10,7 +10,7 @@ const source = JSON.parse(fs.readFileSync(input, 'utf8').replace(/^\uFEFF/, ''))
 const clean = value => String(value ?? '').trim();
 const date = value => /^\d+(\.\d+)?$/.test(value) ? new Date(Date.UTC(1899, 11, 30) + Number(value) * 86400000).toISOString().slice(0, 10) : value;
 const records = [], activities = [], skipped = [];
-const categories = ['HOME', '朱紫', '劍盾', 'ZA', '阿爾宙斯', '珍鑽', '皮伊', 'GO'];
+const categories = ['HOME', '朱紫', '劍盾', '珍鑽', 'ZA', '阿爾宙斯', '皮伊', 'GO'];
 for (const sheet of source.sheets) {
   if (sheet.hidden) continue;
   const header = sheet.rows[0];
@@ -33,15 +33,15 @@ for (const sheet of source.sheets) {
     if (!record.name && !record.account && !record.trainerId) {
       skipped.push({ source: sheet.name, row: row.row, reason: '無會員欄位' }); continue;
     }
-    if (MemberPolicy.isExcluded(record.version)) {
-      skipped.push({source: sheet.name, row: row.row, reason: '依指定版本移除', version: record.version}); continue;
+    if (MemberPolicy.isExcludedRecord(record)) {
+      skipped.push({source: sheet.name, row: row.row, reason: MemberPolicy.isRemovedRecord(record) ? '依指定紀錄移除' : '依指定版本移除', version: record.version}); continue;
     }
     if (sheet.name === '皮伊&GO') record.category = record.version.toUpperCase() === 'GO' ? 'GO' : '皮伊';
     else if (record.version.toUpperCase() === 'GO') record.category = 'GO';
     records.push(MemberPolicy.applyOwnership(record));
   }
 }
-for (const sheet of source.sheets.filter(s => s.hidden && s.name !== '寶可夢練怪')) {
+for (const sheet of source.sheets.filter(s => s.hidden && !['寶可夢練怪','抽抽屋','龍年閃蛋','IG追蹤領閃蛋','蛇年的阿柏怪'].includes(s.name))) {
   const header = sheet.rows.find(row => Object.values(row.cells).some(value => ['帳號', 'IG帳號'].includes(clean(value))));
   if (!header) continue;
   const columns = Object.fromEntries(Object.entries(header.cells).map(([cell, value]) => [clean(value), cell.replace(/\d/g, '')]));
@@ -60,10 +60,10 @@ const known = new Set(records.map(MemberPolicy.fingerprint));
 for (const addition of additions) {
   const record = MemberPolicy.applyOwnership(addition);
   const key = MemberPolicy.fingerprint(record);
-  if (MemberPolicy.isExcluded(record.version) || known.has(key)) continue;
+  if (MemberPolicy.isExcludedRecord(record) || known.has(key)) continue;
   if (!categories.includes(record.category)) throw new Error(`Invalid additional record category: ${record.category}`);
   records.push(record); known.add(key);
 }
-const data = { categories, records, activities, meta: { source: 'Poke訂單.xlsx', additionalSource: 'additional-records.json', recordCount: records.length, activityCount: activities.length, skipped, excludedVersions: MemberPolicy.excludedVersions, removedVersionCount: skipped.filter(item=>item.reason==='依指定版本移除').length, excludedSheets: ['寶可夢練怪'], grouping: '帳號去除頭尾空白、忽略大小寫；空帳號各自保留', credentialsExcluded: true } };
+const data = { categories, records, activities, meta: { source: 'Poke訂單.xlsx', additionalSource: 'additional-records.json', recordCount: records.length, activityCount: activities.length, skipped, excludedVersions: MemberPolicy.excludedVersions, removedVersionCount: skipped.filter(item=>item.reason==='依指定版本移除').length, excludedSheets: ['寶可夢練怪','抽抽屋','龍年閃蛋','IG追蹤領閃蛋','蛇年的阿柏怪'], grouping: '帳號去除頭尾空白、忽略大小寫；空帳號各自保留', credentialsExcluded: true } };
 fs.writeFileSync(path.join(directory, 'data.js'), `/* Generated from the supplied workbook. Passwords are excluded. */\nwindow.MEMBER_DATA = ${JSON.stringify(data).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')};\n`);
 console.log(JSON.stringify({records: records.length, activities: activities.length, skipped, categories: Object.fromEntries(categories.map(c => [c, records.filter(r => r.category === c).length]))}, null, 2));

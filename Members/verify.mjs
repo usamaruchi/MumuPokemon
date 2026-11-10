@@ -11,9 +11,15 @@ vm.runInContext(fs.readFileSync(path.join(directory, 'data.js'), 'utf8'), contex
 vm.runInContext(fs.readFileSync(path.join(directory, 'data-policy.js'), 'utf8'), context);
 vm.runInContext(fs.readFileSync(path.join(directory, 'app.js'), 'utf8'), context);
 const data = context.window.MEMBER_DATA;
+data.records = data.records.map(context.MemberPolicy.applyOwnership);
 const {buildMembers, filterMembers} = context.MemberDirectory;
 const members = buildMembers(data);
-assert.equal(data.records.length, 589);
+assert.equal(data.records.length, 578);
+assert.equal(data.activities.length,0);
+assert(data.activities.every(activity=>!['抽抽屋','龍年閃蛋','IG追蹤領閃蛋','蛇年的阿柏怪'].includes(activity.source)));
+assert(data.records.every(record=>!context.MemberPolicy.isRemovedRecord(record)));
+for (const id of ['珍鑽-8','皮伊&GO-3','朱紫-5']) assert(data.records.some(record=>record.id===id));
+for (const id of context.MemberPolicy.removedRecordIds) assert(context.MemberPolicy.isRemovedRecord({id}));
 assert.equal(data.meta.removedVersionCount,10);
 assert(data.records.every(record=>!context.MemberPolicy.isExcluded(record.version)));
 assert.equal(new Set(data.records.map(record => record.id)).size, data.records.length);
@@ -22,16 +28,20 @@ assert.equal(members.filter(member => !member.account && !member.isOwner).length
 const owner = members.find(member=>member.isOwner);
 assert.equal(members.filter(member=>member.isOwner).length,1);
 assert.equal(owner.displayName,'木木（本人）');
-assert.equal(owner.records.length,32);
+assert.equal(owner.records.length,21);
 assert.equal(owner.games.length,5);
 assert(owner.records.every(record=>context.MemberPolicy.isOwnerRecord(record)));
-for (const name of ['菲蕾德翠卡','海獺君','木木','ムム','무무','일월']) assert(owner.records.some(record=>record.name===name));
-assert.equal(owner.records.find(record=>record.id==='朱紫-2').role,'本人');
+for (const name of ['菲蕾德翠卡','海獺君','木木','ムム','무무']) assert(owner.records.some(record=>record.name===name));
+assert.equal(owner.records.find(record=>record.id==='朱紫-2').role,'本帳');
+assert.equal(owner.records.find(record=>record.id==='ZA-3').role,'本帳');
 assert.equal(owner.records.find(record=>record.id==='朱紫-2').originalRole,'胖丁');
 assert(context.MemberPolicy.isOwnerRecord({name:'另一個名字',role:'胖丁'}));
 assert(!context.MemberPolicy.isOwnerRecord({name:'胖丁',role:'客人'}));
-assert.equal(context.MemberPolicy.applyOwnership({name:'另一個名字',role:'胖丁'}).role,'本人');
-for (const account of ['皮伊主機','本帳','胖丁','GO']) assert(filterMembers(members,{query:account}).some(member=>member.isOwner));
+assert.equal(context.MemberPolicy.applyOwnership({name:'另一個名字',role:'胖丁'}).role,'本帳');
+for (const role of ['本人','本帳','主號']) assert.equal(context.MemberPolicy.applyOwnership({role}).role,'本帳');
+for (const role of ['虛帳','賣號','小號','虛主']) assert.equal(context.MemberPolicy.applyOwnership({role}).role,'虛帳');
+assert.equal(context.MemberPolicy.applyOwnership({role:'客人'}).role,'客人');
+for (const account of ['本帳','胖丁','GO']) assert(filterMembers(members,{query:account}).some(member=>member.isOwner));
 assert.equal(data.records.filter(record=>!record.account && !context.MemberPolicy.isOwnerRecord(record)).length,9);
 for (const [name,account,count] of [['Suisei','Suisei Lin',2],['幻亦玉','ortiz55',2]]) {
   const member = members.find(member=>member.account===account);
@@ -49,6 +59,8 @@ assert.equal(data.records.filter(record=>record.category==='阿爾宙斯').lengt
 assert(data.records.filter(record=>record.category==='阿爾宙斯').every(record=>record.version==='阿爾宙斯'));
 assert.equal(context.MemberPolicy.applyOwnership({category:'阿爾',version:''}).version,'阿爾宙斯');
 assert.equal(context.MemberPolicy.applyOwnership({category:'阿爾',version:''}).category,'阿爾宙斯');
+assert.equal(context.MemberPolicy.applyOwnership({category:'ZA',version:''}).version,'ZA');
+assert.equal(filterMembers(members,{version:'ZA'}).length,filterMembers(members,{category:'ZA'}).length);
 assert(!/密碼|password/i.test(JSON.stringify(data.records)));
 assert(data.activities.every(activity => members.some(member => member.activities.some(item => item.id === activity.id))));
 const example = filterMembers(members, {query:' AA0922988987 '});
@@ -85,9 +97,9 @@ try {
   await page.locator('[data-member="owner:mumu"]').click();
   assert.equal(await page.locator('#detail-title').textContent(),'木木（本人）');
   assert.equal(await page.locator('#detail .profile-summary .badge').count(),5);
-  assert.match(await page.locator('#detail-body').textContent(),/32 筆遊戲角色/);
-  for (const name of ['菲蕾德翠卡','海獺君','ムム','무무','일월']) assert((await page.locator('#detail-body').textContent()).includes(name));
-  assert.match(await page.locator('#detail-body').textContent(),/皮伊主機/);
+  assert.match(await page.locator('#detail-body').textContent(),/21 筆遊戲角色/);
+  for (const name of ['菲蕾德翠卡','海獺君','ムム','무무']) assert((await page.locator('#detail-body').textContent()).includes(name));
+  assert.doesNotMatch(await page.locator('#detail-body').textContent(),/皮伊主機/);
   await page.locator('#close-detail').click();
   assert.match(await page.locator('#stats').textContent(),/待確認歸屬9/);
   await page.locator('[data-category="阿爾宙斯"]').click();
@@ -130,7 +142,7 @@ try {
     if (fs.existsSync(valid)) {
       await page.locator('#import-file').setInputFiles(valid);
       await page.waitForFunction(()=>document.getElementById('import-status').textContent.includes('新增 2 筆'));
-      assert.match(await page.locator('#import-status').textContent(),/略過 1 筆完全重複資料、1 筆已移除版本/);
+      assert.match(await page.locator('#import-status').textContent(),/略過 1 筆完全重複資料、1 筆已移除資料/);
       await page.locator('#search').fill('template_test_member');
       assert.equal(await page.locator('.member-card').count(),1);
       await page.locator('.member-card').click();
