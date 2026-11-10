@@ -27,3 +27,6 @@
 .home-table .column-contact{width:22%}
 .home-table .column-date{width:18%}
 .game-table td,.game-table th,.home-table td,.home-table th{vertical-align:middle;white-space:normal;overflow-wrap:anywhere;line-height:1.6}
+
+/* A uniform, subtle tint separates member cards from the workspace. */
+.member-card{background:#fafcf9}
