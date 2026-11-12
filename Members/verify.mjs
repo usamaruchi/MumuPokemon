@@ -15,7 +15,7 @@ data.records = data.records.map(context.MemberPolicy.applyOwnership);
 const {buildMembers, filterMembers} = context.MemberDirectory;
 assert.equal(data.records.filter(r=>r.internalId==='1686' && r.trainerId==='425142' && r.account==='andy9511060').length,1);
 const members = buildMembers(data);
-assert.equal(data.records.length, 577);
+assert.equal(data.records.length, 579);
 assert.equal(data.activities.length,0);
 assert(data.activities.every(activity=>!['抽抽屋','龍年閃蛋','IG追蹤領閃蛋','蛇年的阿柏怪'].includes(activity.source)));
 assert(data.records.every(record=>!context.MemberPolicy.isRemovedRecord(record)));
