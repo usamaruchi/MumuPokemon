@@ -118,5 +118,25 @@
     "email": "",
     "source": "使用者提供圖片",
     "row": 2
+  },
+  {
+    "id": "manual-za-mc_clip-0073-297061",
+    "category": "ZA",
+    "internalId": "0073",
+    "trainerId": "297061",
+    "name": "理理沙",
+    "gender": "♀",
+    "version": "ZA",
+    "nationality": "CHT",
+    "role": "客人",
+    "account": "mc_clip",
+    "notes": "",
+    "method": "",
+    "channel": "",
+    "contact": "",
+    "date": "",
+    "email": "",
+    "source": "使用者提供圖片",
+    "row": 1
   }
 ]
