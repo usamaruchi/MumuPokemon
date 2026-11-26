@@ -15,7 +15,7 @@ data.records = data.records.map(context.MemberPolicy.applyOwnership);
 const {buildMembers, filterMembers} = context.MemberDirectory;
 assert.equal(data.records.filter(r=>r.internalId==='1686' && r.trainerId==='425142' && r.account==='andy9511060').length,1);
 const members = buildMembers(data);
-assert.equal(data.records.length, 584);
+assert.equal(data.records.length, 586);
 assert.equal(data.activities.length,0);
 assert(data.activities.every(activity=>!['抽抽屋','龍年閃蛋','IG追蹤領閃蛋','蛇年的阿柏怪'].includes(activity.source)));
 assert(data.records.every(record=>!context.MemberPolicy.isRemovedRecord(record)));
@@ -43,7 +43,7 @@ for (const role of ['本人','本帳','主號']) assert.equal(context.MemberPoli
 for (const role of ['虛帳','賣號','小號','虛主']) assert.equal(context.MemberPolicy.applyOwnership({role}).role,'虛帳');
 assert.equal(context.MemberPolicy.applyOwnership({role:'客人'}).role,'客人');
 for (const account of ['本帳','胖丁','GO']) assert(filterMembers(members,{query:account}).some(member=>member.isOwner));
-assert.equal(data.records.filter(record=>!record.account && !context.MemberPolicy.isOwnerRecord(record)).length,9);
+assert.equal(data.records.filter(record=>!record.account && !context.MemberPolicy.isOwnerRecord(record)).length,10);
 for (const [name,account,count] of [['Suisei','Suisei Lin',2],['幻亦玉','ortiz55',2]]) {
   const member = members.find(member=>member.account===account);
   assert.equal(member.records.length,count);
@@ -102,7 +102,7 @@ try {
   for (const name of ['菲蕾德翠卡','海獺君','ムム','무무']) assert((await page.locator('#detail-body').textContent()).includes(name));
   assert.doesNotMatch(await page.locator('#detail-body').textContent(),/皮伊主機/);
   await page.locator('#close-detail').click();
-  assert.match(await page.locator('#stats').textContent(),/待確認歸屬9/);
+  assert.match(await page.locator('#stats').textContent(),/待確認歸屬10/);
   assert.deepEqual(await page.locator('#category-filter option').allTextContents(),['全部會員','HOME','朱紫','劍盾','珍鑽','ZA','阿爾宙斯','皮伊','GO']);
   await page.locator('#category-filter').selectOption('珍鑽');
   assert.equal(await page.locator('[data-category="珍鑽"]').getAttribute('aria-pressed'),'true');
